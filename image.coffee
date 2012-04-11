@@ -1,9 +1,38 @@
+calculateRADEC = (point)->
+  fitPatt =/([0-9][0-9])([0-9][0-9])([0-9])([+-])([0-9][0-9])([0-9][0-9])([0-9])E.fits/gi;
+  matches = fitPatt.exec(point)
+  hours = parseInt(matches[1], 10)
+  minutes = parseInt(matches[2], 10)
+  seconds = parseInt(matches[3], 10)
+  seconds /= 10.0
+  minutes += seconds
+  minutes /= 60.0
+  hours += minutes
+  hours *= 15
+  RA = hours
+  ###
+  Now calculate DEC
+  ###
+  degrees= parseInt(matches[5], 10)
+  minutes = parseInt(matches[6], 10)
+  seconds = parseInt(matches[7], 10)
+  DEC = degrees
+  minutes = minutes + seconds/10.0
+  DEC = DEC + minutes/60.0
+  if(matches[4] == '-')
+   DEC = 0 - DEC
+  return [RA, DEC]
+  
+  
+  
 class ImageLoader
   ###
   Image loader is used to load multiple images at once, then call a function when they are all loaded.
+  TODO:Needs to be a singleton.
+  TODO: Needs to cache, as in an object
   ###
   constructor:()->
-    @imageHolder = []
+    @imageHolder = {}
     @loadStack = 0
     @count = 0
     @start = false
@@ -11,19 +40,22 @@ class ImageLoader
       
   ###
   Parameter: image url (DO NOT PUT AN ACTUAL IMAGE ELEMENT IN, Only the URL)
+            action: a function that will be called when the image is done loading.  
   returns: Nothing
   Push an image to the image stack.
+  
   ###
-  pushImage:(imgUrl)->
-    newImg = document.createElement("img")
-    @loadStack += 1
-    @count +=1
-    newImg.src = imgUrl
-    newImg.onload = ()=>
-      @loadStack-=1
-      if(@loadStack == 0 and @start)
-        @loadedFunc()
-    @imageHolder.push(newImg)
+  pushImage:(imgUrl, action)->
+    if(@imageHolder[imgUrl]?)
+    else
+      newImg = document.createElement("img")
+      @loadStack += 1
+      @count +=1
+      newImg.src = imgUrl
+      newImg.onload = ()=>
+        @loadStack-=1
+        action(newImg)
+      @imageHolder[imgUrl] = newImg
     
   ###
   Will set a flag that allows the loading to 'begin'. Technically, it starts when you push an image onto the stack
@@ -69,18 +101,26 @@ class ImageLoader
     @imageHolder = []
 ################################################################################
 #Pane:
-#   -image
-#   -Texture
-#   -RA/DEC
+# Interface:
+#   constructor(imageElement)-- Will set the image element in the pane
+#   createTexture(glContext) -- Will bind the inner image to a gltexture
+#   weightedPoint(point)-- Makes the pane into a weightedPane which has RA / DEC values
 ################################################################################
 class Pane
-  constructor:(img, gl)->
+  constructor:(img)->
       @image = img
+  createTexture:(gl)->
+      @texture = gl.createTexture();
+      @texture.image = @image
+      doLoadImageTexture(gl, @texture.image, @texture)
+      handleLoadedTexture(gl, @texture)
+
+  weightedPoint:(point)->
       fitPatt =/([0-9][0-9])([0-9][0-9])([0-9])([+-])([0-9][0-9])([0-9][0-9])([0-9])E.fits/gi;
-      matches = fitPatt.exec(img.src)
-      hours = parseInt(matches[1])
-      minutes = parseInt(matches[2])
-      seconds = parseInt(matches[3])
+      matches = fitPatt.exec(point)
+      hours = parseInt(matches[1], 10)
+      minutes = parseInt(matches[2], 10)
+      seconds = parseInt(matches[3], 10)
       seconds /= 10.0
       minutes += seconds
       minutes /= 60.0
@@ -90,35 +130,14 @@ class Pane
       ###
       Now calculate DEC
       ###
-      degrees= parseInt(matches[5])
-      minutes = parseInt(matches[6])
-      seconds = parseInt(matches[7])
+      degrees= parseInt(matches[5], 10)
+      minutes = parseInt(matches[6], 10)
+      seconds = parseInt(matches[7], 10)
       @DEC = degrees
       minutes = minutes + seconds/10.0
       @DEC = @DEC + minutes/60.0
-      @image.setAttribute('width', '1024px')
-      @image.setAttribute('height', '1024px')
-      @texture = gl.createTexture();
-      @texture.image = img
-      doLoadImageTexture(gl, @texture.image, @texture)
-      handleLoadedTexture(gl, @texture)
       if(matches[4] == '-')
-          @DEC = 0 - @DEC
-    ###
-    type: RA to compare RA, DEC to compare DEC
-    ###
-  compare:(otherPane, type)->
-      myObj = @DEC
-      otherObj = otherPane.DEC
-      if type == 'RA'
-          myObj = @RA
-          otherObj = otherPane.RA
-      if(myObj > otherObj)
-          return 1
-      else if(myObj < otherObj)
-          return -1
-      else
-          return 0
+        @DEC = 0 - @DEC
   ###
   The layout is a bunch of panes placed based on their DEC and RA:
   
@@ -145,15 +164,16 @@ class Pane
 #
 # interface:
 #   draw() ---- will take the default gl and draw all the textures from TEXTURE_0, no return value
-#   getImageArray(boundingBox, url)----will fill up the Overlay by communicating with the server backend with the bounding box.
-#       (boundingBox): Holds RAMin, RAMax, DecMin, DecMax most likely pulled from the canvas
+#   getImageArray(fitsFileArray)----will fill up the Overlay by communicating with the server backend with the bounding box.
 #   clear()---Clears out the Panes, indeces, and textures. Useful for jumping locations
 ################################################################################
 class Overlay
   constructor:(gl)->
+    @type = "FIRST"
+    @span = {'RAMin':0 , 'RAMax':0, 'DecMin':0, 'DecMax':0}
     @gl = gl
     @x = @y = @z = 0
-    @z = 1.8
+    @z = 2.414213562
     @index = 0
     @indices = []
     @textureCoords = []
@@ -161,79 +181,53 @@ class Overlay
     @opacity = 1.0
     @preLoader = new ImageLoader()
     @panes = []
-    @layout = []
-    @DECValues = []
-    @RAValues = []
     @onReady = ()-> return null
     @ready = false
-  constructPanes:()=>
-    for singleImage in @preLoader.imageHolder #Go through every image in the preloader
-      @panes.push(new Pane(singleImage, @gl))
-    for pane in @panes
-      @placePane(pane)
-      @pushTexture(pane)
-    @onReady()
-    @ready = true
-  placePane:(pane)->
-    RAPosition = 0
-    DECPosition = 0
-    while true
-      if(!@RAValues[RAPosition]?)
-        @RAValues[RAPosition] = pane.RA
-        @layout.splice(RAPosition,0,[])
-        break
-      else if(pane.RA == @RAValues[RAPosition])        
-        break
-      else if(pane.RA < @RAValues[RAPosition])
-        @RAValues.splice(RAPosition, 0, pane.RA)
-        @layout.splice(RAPosition, 0, [])
-        break
-      RAPosition++
-    #Same for DEC
-    while true
-      if(!@DECValues[DECPosition]?)
-        @DECValues[DECPosition] = pane.DEC
-        for curr in @layout
-            curr.splice(DECPosition, 0, undefined)
-        break
-      else if(pane.DEC == @DECValues[DECPosition])        
-        break
-      else if(pane.DEC > @DECValues[DECPosition])
-        @DECValues.splice(DECPosition, 0, pane.DEC)
-        for curr in @layout
-          curr.splice(DECPosition, 0, undefined)
-        break
-      DECPosition++
-    @layout[RAPosition][DECPosition] = pane
-    #alert("Current one:{#{pane.RA},#{pane.DEC}} \nRA vals: #{@RAValues} \nDec vals: #{@DECValues}\n Pos: {#{RAPosition}, #{DECPosition} }\n #{@layout}")
+  translate:(x,y,z)->
+    if(-@x - x > 0)
+      @x += x
+    if(@y + y > -90 and @y + y < 90)
+      @y += y
+    @z += z
+  constructPane:(image)=>
+    newPane = new Pane(image)
+    newPane.weightedPoint(image.src)
+    @pushBounds(newPane)
+    if(image.height != 1024 or image.width != 1024)
+      return
+    newPane.createTexture(@gl)
+    @pushTexture(newPane) #Pushes texture onto the indices / vertices stack to be called later.
+    @panes.push(newPane) #Panes to be displayed, at this point this image is ready to be displayed.
   getImageArray:(boundingBox)->
-    @clear()
-    $.get('../../db/remote/SPATIALTREE.php', boundingBox, @insertImages, 'json')
+    #$.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', boundingBox, @insertImages, 'json')
+    #TODO: SEND THIS TO OUTER CLASS
+    @insertImages(['00000+00000E.fits.jpg'])
+    if @span.RAMax < boundingBox.RAMax
+      @span.RAMax = boundingBox.RAMax
+    if @span.RAMin > boundingBox.RAMin
+      @span.RAMin = boundingBox.RAMin
+    if @span.DecMax < boundingBox.DecMax
+      @span.DecMax = boundingBox.DecMax
+    if @span.DecMin > boundingBox.DecMin
+      @span.DecMin = boundingBox.DecMin  
   insertImages:(arr)=>
-    if(!arr?)
-      console.log("SOMETHING HAS HAPPENED!!!!")
     for url in arr
-      @preLoader.pushImage(url)
-    @preLoader.onFullLoad(@constructPanes)
-    @preLoader.startLoad()
-  createCanvas:()->
-    canv = document.createElement('canvas')
-    max = @RAValues.length
-    if(max < @DECValues.length)
-      max = @DECValues
-    max *= 1024
-    canvasSize = 1024
-    while(canvasSize < max)
-      canvasSize *=2
-    canv.setAttribute('width', canvasSize)
-    canv.setAttribute('height', canvasSize)
-    return canv
+      @preLoader.pushImage(url, @constructPane)
+  pushBounds:(pane)->
+    if((pane.RA+.256) >  @span.RAMax)
+      @span.RAMax = pane.RA+.256
+    else if((pane.RA - .256) <  @span.RAMin)
+      @span.RAMin = pane.RA-.256
+    if((pane.Dec+.256) >  @span.DecMax)
+      @span.DecMax = pane.Dec+.256
+    else if((pane.Dec - .256) <  @span.DecMin)
+      @span.DecMin = pane.Dec-.256
   pushTexture:(pane)->
-    right = 1.0 + Math.round(pane.RA/.512)*2
-    left = -1.0 + Math.round(pane.RA/.512)*2
+    right = 1.0 - Math.round(pane.RA/.512)*2
+    left = -1.0 - Math.round(pane.RA/.512)*2
     top = 1.0 + Math.round(pane.DEC/.512)*2
     bottom = -1.0 + Math.round(pane.DEC/.512)*2
-    alert(pane.DEC)
+    #console.log("{#{pane.RA}, #{pane.DEC}}: #{right}, #{left}, tb #{top}, #{bottom} ");
     @vertices.push(left); @vertices.push(bottom); @vertices.push(0);
     @vertices.push(right); @vertices.push(bottom); @vertices.push(0);
     @vertices.push(right); @vertices.push(top); @vertices.push(0);
@@ -253,22 +247,12 @@ class Overlay
     @opacity = 1.0
    # @preLoader.clear()
     @panes = []
-    @layout = []
-    @DECValues = []
-    @RAValues = []
   display:()->
-    @gl.viewport(0, 0, 1024, 1024);
-    @gl.clear(@gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT); # clear color and depth
-    @gl.clearColor(0.0,0.0,0.0,1.0);
-    @gl.perspectiveMatrix.makeIdentity();
-    @gl.perspectiveMatrix.perspective(45, 1, 0.01, 100);
-    @gl.perspectiveMatrix.lookat(@x, @y, @z, @x, @y, 0, 0, 1, 0);
-
+    @gl.uniform1i(@gl.getUniformLocation(@gl.program, @type), 0);
     texCoordObject = @gl.createBuffer();
     @gl.bindBuffer(@gl.ARRAY_BUFFER, texCoordObject);
     @gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(@textureCoords), @gl.STATIC_DRAW);
     @gl.bindBuffer(@gl.ARRAY_BUFFER, null);
-
     vertexObject = @gl.createBuffer();
     @gl.bindBuffer(@gl.ARRAY_BUFFER, vertexObject);
     @gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(@vertices), @gl.STATIC_DRAW);
@@ -291,27 +275,58 @@ class Overlay
 
     i = 0
     for pane in @panes
-      @gl.bindTexture(@gl.TEXTURE_2D, pane.texture);
-      @gl.drawElements(@gl.TRIANGLES, 6, @gl.UNSIGNED_SHORT, i);
+      if(pane.texture and @withinView(pane))
+        @gl.bindTexture(@gl.TEXTURE_2D, pane.texture);
+        @gl.drawElements(@gl.TRIANGLES, 6, @gl.UNSIGNED_SHORT, i);  
+      else if(@withinView(pane))
+        pane.createTexture(@gl)
+        @gl.bindTexture(@gl.TEXTURE_2D, pane.texture);
+        @gl.drawElements(@gl.TRIANGLES, 6, @gl.UNSIGNED_SHORT, i);  
+      else if(!(pane.texture == null))
+        console.log("Removed pane from field")
+        @gl.deleteTexture(pane.texture);
+        pane.texture = null;
       i+=12
-    @gl.flush();
+   # @gl.flush();
    # @gl.bindBuffer(@gl.ELEMENT_ARRAY_BUFFER, null);
-
-
+  withinView:(pane)->
+    view = @returnBounds()
+    return ((view.RAMax > (pane.RA-.512) and view.RAMin < (pane.RA+.512)) and (view.DecMax > (pane.DEC-.512) and view.DecMin < (pane.DEC+.512)))
+  withinSpan:(bound)->
+    #console.log("RA:{#{bound.RAMin}, #{bound.RAMax}} Dec: {#{bound.DecMin}, #{bound.DecMax}}~~~~Span: RA:{#{@span.RAMin}, #{@span.RAMax}} Dec: {#{@span.DecMin}, #{@span.DecMax}}")
+    return (bound.RAMax < @span.RAMax) and (bound.RAMin > @span.RAMin) and (bound.DecMax < @span.DecMax) and (bound.DecMin > @span.DecMin)
+  #Returns viewBound
   returnBounds:()->
-    ###
-    boundingBox = []
-    boundingBox[0] = [(@RAValues[0]-.256)/.512, (@DECValues[0]+.256)/.512]
-    boundingBox[1] = [(@RAValues[0]-.256)/.512, (@DECValues[@DECValues.length-1]-.256)/.512]
-    boundingBox[2] =  [(@RAValues[@RAValues.length-1]+.256)/.512, (@DECValues[@DECValues.length-1]-.256)/.512]
-    boundingBox[3] = [(@RAValues[@RAValues.length-1]+.256)/.512, (@DECValues[0]+.256)/.512]
-    ###
-    boundingBox = []
-    boundingBox[0]=(@RAValues[0]+ @RAValues[@RAValues.length-1])/2.0
-    boundingBox[0] /= .512
-    boundingBox[1] = (@DECValues[0] + @DECValues[@DECValues.length-1])/2.0
-    boundingBox[1] /= .512
+    center = {'RA':-@x*.256, 'DEC':-@y*.256}
+    height = width = @z/1.8*.512
+    boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2  }
     return boundingBox
+  
+class SDSSOverlay extends Overlay    
+  constructPane:(image)=>
+    newPane = new Pane(image)
+    newPane.RA = arguments[1]
+    newPane.DEC = arguments[2]
+    newPane.createTexture(@gl)
+    @pushBounds(newPane)
+    @pushTexture(newPane) #Pushes texture onto the indices / vertices stack to be called later.
+    @panes.push(newPane)
+  insertImages:(arr)=>
+    for url in arr
+      point = calculateRADEC(url)
+      ra = point[0]
+      dec = point[1]
+      newurl ="http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=#{1.8}&ra=#{ra}&dec=#{dec}&width=1024&height=1024"
+      @preLoader.pushImage(newurl, ((ra,dec)=>(
+        raf = ra
+        decf = dec
+        fun = @constructPane
+        return (image)->(fun(image, raf,decf))
+        ))(ra,dec))
+  setSDSS:->
+    @type = "SDSS"
+
+   # @gl.flush();
 ################################################################################
 #TESTING STUFF BELOW
 #rawr = document.getElementById("testCanvas");
