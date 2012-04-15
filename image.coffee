@@ -1,30 +1,3 @@
-calculateRADEC = (point)->
-  fitPatt =/([0-9][0-9])([0-9][0-9])([0-9])([+-])([0-9][0-9])([0-9][0-9])([0-9])E.fits/gi;
-  matches = fitPatt.exec(point)
-  hours = parseInt(matches[1], 10)
-  minutes = parseInt(matches[2], 10)
-  seconds = parseInt(matches[3], 10)
-  seconds /= 10.0
-  minutes += seconds
-  minutes /= 60.0
-  hours += minutes
-  hours *= 15
-  RA = hours
-  ###
-  Now calculate DEC
-  ###
-  degrees= parseInt(matches[5], 10)
-  minutes = parseInt(matches[6], 10)
-  seconds = parseInt(matches[7], 10)
-  DEC = degrees
-  minutes = minutes + seconds/10.0
-  DEC = DEC + minutes/60.0
-  if(matches[4] == '-')
-   DEC = 0 - DEC
-  return [RA, DEC]
-  
-  
-  
 class ImageLoader
   ###
   Image loader is used to load multiple images at once, then call a function when they are all loaded.
@@ -313,7 +286,7 @@ class SDSSOverlay extends Overlay
     @panes.push(newPane)
   insertImages:(arr)=>
     for url in arr
-      point = calculateRADEC(url)
+      point = Util::calculateRADEC(url)
       ra = point[0]
       dec = point[1]
       newurl ="http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=#{1.8}&ra=#{ra}&dec=#{dec}&width=1024&height=1024"

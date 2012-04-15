@@ -41,13 +41,4 @@ class BoxOverlay
                 @onBox({start: @start, end:@end})
             @draw = false
         )
-        pixelSpaceToDegreeSpace: (pixelPoint, degreeCenterPoint, pixelCenter, scale)->
-            #Assertion: Stuff must be in there!
-            if(!(pixelPoint.x? and pixelPoint.y? and degreeCenterPoint.x? and degreeCenterPoint.y?))
-                return null
-            pixelWidth = pixelPoint.x - pixelCenter.x
-            pixelHeight = pixelHeight.y - pixelHeight.y
-            ###Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds###
-            degreeWidth = pixelWidth*scale/3600.0
-            degreeHeight = pixelHeight*scale/3600.0
-            
+  
