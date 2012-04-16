@@ -1,4 +1,9 @@
 class Util
+	###
+	FUNCTION: calculateRADEC(point)
+	Param: point--A single string formatted in FITS file format.
+	Return: [RA, DEC] in degree format
+	###
 	calculateRADEC:(point)->
 		fitPatt =/([0-9][0-9])([0-9][0-9])([0-9])([+-])([0-9][0-9])([0-9][0-9])([0-9])E.fits/gi
 		matches = fitPatt.exec(point)
@@ -23,6 +28,14 @@ class Util
 		if(matches[4] == '-')
 			DEC = 0 - DEC
 		return [RA, DEC]
+	###
+	FUNCTION: pixelSpaceToDegreeSpace(pixelPoint, degreeCenterPoint, pixelCenter, scale)
+	Param:  pixelPoint--An {x,y} point in pixel space 
+			degreeCenterPoint-- in Degree space point
+			pixelCenter -- center point in pixel space used to convert to degreecenterpoint
+			scale -- need this as well to get arcsec/pixel and then calculate pixel width and stuff
+	Return: [RA, DEC] in degree space of pixelPoint
+	###
 	pixelSpaceToDegreeSpace: (pixelPoint, degreeCenterPoint, pixelCenter, scale)->
 		#Assertion: Stuff must be in there!
 		if(!(pixelPoint.x? and pixelPoint.y? and degreeCenterPoint.x? and degreeCenterPoint.y?))
