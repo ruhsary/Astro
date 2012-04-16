@@ -296,8 +296,6 @@ class SDSSOverlay extends Overlay
         fun = @constructPane
         return (image)->(fun(image, raf,decf))
         ))(ra,dec))
-  setSDSS:->
-    @type = "SDSS"
 
    # @gl.flush();
 ################################################################################

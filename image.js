@@ -425,10 +425,6 @@
       return _results;
     };
 
-    SDSSOverlay.prototype.setSDSS = function() {
-      return this.type = "SDSS";
-    };
-
     return SDSSOverlay;
 
   })(Overlay);

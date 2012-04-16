@@ -48,12 +48,12 @@
     			degreeCenterPoint-- in Degree space point
     			pixelCenter -- center point in pixel space used to convert to degreecenterpoint
     			scale -- need this as well to get arcsec/pixel and then calculate pixel width and stuff
-    	Return: [RA, DEC] in degree space of pixelPoint
+    	Return: {x,y} in degree space of pixelPoint
     */
 
 
     Util.prototype.pixelSpaceToDegreeSpace = function(pixelPoint, degreeCenterPoint, pixelCenter, scale) {
-      var degreeHeight, degreeWidth, pixelHeight, pixelWidth;
+      var degreeHeight, degreePoint, degreeWidth, pixelHeight, pixelWidth;
       if (!((pixelPoint.x != null) && (pixelPoint.y != null) && (degreeCenterPoint.x != null) && (degreeCenterPoint.y != null))) {
         return null;
       }
@@ -63,7 +63,12 @@
       */
 
       degreeWidth = pixelWidth * scale / 3600.0;
-      return degreeHeight = pixelHeight * scale / 3600.0;
+      degreeHeight = pixelHeight * scale / 3600.0;
+      degreePoint = {
+        'x': degreeCenterPoint.x - degreeWidth,
+        'y': degreeCenterPoint.y + degreeHeight
+      };
+      return degreePoint;
     };
 
     return Util;

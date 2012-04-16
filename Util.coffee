@@ -34,7 +34,7 @@ class Util
 			degreeCenterPoint-- in Degree space point
 			pixelCenter -- center point in pixel space used to convert to degreecenterpoint
 			scale -- need this as well to get arcsec/pixel and then calculate pixel width and stuff
-	Return: [RA, DEC] in degree space of pixelPoint
+	Return: {x,y} in degree space of pixelPoint
 	###
 	pixelSpaceToDegreeSpace: (pixelPoint, degreeCenterPoint, pixelCenter, scale)->
 		#Assertion: Stuff must be in there!
@@ -45,3 +45,6 @@ class Util
 		###Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds###
 		degreeWidth = pixelWidth*scale/3600.0
 		degreeHeight = pixelHeight*scale/3600.0
+		degreePoint = {'x':(degreeCenterPoint.x - degreeWidth), 'y':(degreeCenterPoint.y + degreeHeight)}
+		return degreePoint
+	
