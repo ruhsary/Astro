@@ -140,18 +140,10 @@ class Overlay
     newPane.createTexture(@gl)
     @pushTexture(newPane) #Pushes texture onto the indices / vertices stack to be called later.
     @panes.push(newPane) #Panes to be displayed, at this point this image is ready to be displayed.
-  getImageArray:(boundingBox)->
-    #$.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', boundingBox, @insertImages, 'json')
+  requestImages:(span)->
+    $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', span, @insertImages, 'json')
     #TODO: SEND THIS TO OUTER CLASS
-    @insertImages(['00000+00000E.fits.jpg'])
-    if @span.RAMax < boundingBox.RAMax
-      @span.RAMax = boundingBox.RAMax
-    if @span.RAMin > boundingBox.RAMin
-      @span.RAMin = boundingBox.RAMin
-    if @span.DecMax < boundingBox.DecMax
-      @span.DecMax = boundingBox.DecMax
-    if @span.DecMin > boundingBox.DecMin
-      @span.DecMin = boundingBox.DecMin  
+    @insertImages(['00000+00000E.fits.jpg']) 
   insertImages:(arr)=>
     for url in arr
       @preLoader.pushImage(url, @constructPane)

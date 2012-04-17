@@ -1,6 +1,7 @@
 class View
 	constructor: (canvas3dctx, canvas2dctx)->
-		@span = {'RAMin':0 , 'RAMax':0, 'DecMin':0, 'DecMax':0}
+		@span = {'RAMin':0 , 'RAMax':.256, 'DecMin':-.256, 'DecMax':.256 }
+		@requestBounds = {'RAMin':0 , 'RAMax':0, 'DecMin':0, 'DecMax':0 }
 		@overlays = []
 		@canvas2d = canvas2dctx
 		@gl = canvas3dctx
@@ -28,6 +29,31 @@ class View
 		for overlay in @overlays
 			overlay.display(@getBounds())
 		@gl.flush();
+	withinSpan:(bound)->return ((bound.RAMax < @span.RAMax) and (bound.RAMin > @span.RAMin) and (bound.DecMax < @span.DecMax) and (bound.DecMin > @span.DecMin));
+	requestBoundExpansion:(side)->
+		if(side == 1) 
+			#Get current decMax, add .512 to span, send to requestFIRST
+			@requestBounds.RAMin = @span.RAMin
+			@requestBounds.RAMax = @span.RAMax
+			@requestBounds.DecMin = @span.DecMax
+			@requestBounds.DecMax = @span.DecMax = @span.DecMax + .512
+		else if(side == 3) 
+			@requestBounds.RAMin = @span.RAMin
+			@requestBounds.RAMax = @span.RAMax
+			@requestBounds.DecMax = @span.DecMin
+			@requestBounds.DecMin = @span.DecMin = @span.DecMin -.512
+		else if(side == 2) 
+			@requestBounds.DecMax = @span.DecMax
+			@requestBounds.DecMin = @span.DecMin
+			@requestBounds.RAMax = @span.RAMin
+			@requestBounds.RAMin = @span.RAMin = @span.RAMin - .512
+		else if(side == 4)
+			@requestBounds.DecMax = @span.DecMax
+			@requestBounds.DecMin = @span.DecMin
+			@requestBounds.RAMin = @span.RAMax
+			@requestBounds.RAMax = @span.RAMax = @span.RAMax + .512
+		else
+			return
 	###
 	FUNCTION: getBounds()
 
@@ -35,7 +61,21 @@ class View
 	assume this
 	###
 	getBounds:()->
-	    center = {'RA':-@camera.x*.256, 'DEC':-@camera.y*.256}
-	    height = width = @z/2.414213562*1.8*.512
-	    boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2  }
-	    return boundingBox
+		center = {'RA':-@camera.x*.256, 'DEC':-@camera.y*.256}
+		height = width = @z/2.414213562*1.8*.512
+		boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2  }
+		return boundingBox
+    scrolling:(event)->
+    	delta = 0;
+	    if (!event) 
+	    	event = window.event;
+	    #normalize the delta
+	    if (event.wheelDelta)
+	    	#IE and Opera
+	        delta = event.wheelDelta / 60;
+	    else if (event.detail) 
+	    	delta = -event.detail / 2;
+	    if(delta > 0 && @camera.z >= 1.8)
+	    	@translate(0,0,-.3)
+	    else if(delta <= 0)
+	    	@translate(0,0,.3)

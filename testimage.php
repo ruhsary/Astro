@@ -55,7 +55,7 @@
   	var height = -1;
   	var width_div_2 = 0;
   	var height_div_2 = 0;
-    var overlay;	
+    var overlay;
     var toggle = true;
 	var overlays = [];
 	var fov = 45.0;
@@ -63,9 +63,6 @@
 		
 	
   function init() {
-		
-		width_div_2 = width/2.0;
-		height_div_2 = height/2.0;
 		
     // Initialize		
    var gl = initWebGL(
@@ -91,9 +88,6 @@
 		gl.enable(gl.BLEND);
 		gl.disable(gl.DEPTH_TEST);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-		
-		//for(var i = 0; i < 1; i++)	{
-		//}
 		
     return gl;
   }   	  
@@ -149,33 +143,7 @@
 
         }
         });
-       var moveObject = function(event){
-        var delta = 0;
-        if (!event) event = window.event;
-    
-        // normalize the delta
-        if (event.wheelDelta) {
-    
-            // IE and Opera
-            delta = event.wheelDelta / 60;
-    
-        } else if (event.detail) {
-    
-            // W3C
-            delta = -event.detail / 2;
-        }
-        if(delta > 0 && overlay.z >= 1.8){
-            overlay.translate(0,0,-.3)
-		}
-
-        else if(delta <= 0){
-				overlay.translate(0,0,.3)
-				bb = overlay.returnBounds()		
-				if(bb.RAMin < 0)		
-						bb.RAMin = 0;
-				overlay.getImageArray(bb)
-        }
-    }
+ 
     if(window.addEventListener)
 		document.getElementById('skycanvas').addEventListener('DOMMouseScroll', moveObject, false);
 	//for IE/OPERA etc
@@ -195,16 +163,16 @@
 
 		overlay.getImageArray(bb)
   }	
+  $(document).ready(function(){
+  	startStuff();
+  })
 </script>
 </head>
-<body id= "rawr" onload="startStuff()">
+<body id= "rawr">
 	<div style="position: absolute; top: 20px; left: 30px;">
 		<canvas id="skycanvas2" width="1024px" height="1024px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: 10">Test</canvas>
 		<canvas id="skycanvas" width= "1024px" height="1024px" style="border: solid 1px black; position: absolute; left: 1px; top: 1px">Test</canvas>
 	</div>
 
 </body>
-<script type="text/javascript">
-
-</script>
 </html>

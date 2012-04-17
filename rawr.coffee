@@ -1,1 +1,0 @@
-alert "Go fuck yourself"
