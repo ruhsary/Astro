@@ -127,45 +127,34 @@
 	var view = new View(gl, ctx)
 	view.display();
 	view.requestFIRST();
+	if(window.addEventListener)
+		document.getElementById('skycanvas').addEventListener('DOMMouseScroll', view.scrolling, false);
+	//for IE/OPERA etc
+	document.getElementById('skycanvas').onmousewheel = view.scrolling;
     //console.log("{RAMin: "+ bb.RAMin+ ", RAMax: "+bb.RAMax+", DECMax: "+ bb.DecMax+", DECMin: "+bb.DecMin+"}")
 	
 	    setInterval(function() {
 	    	view.display();
 						}, 15);
- /*     $("#skycanvas").mousedown(function(event){
-        overlay.md = true;
-        overlay.cx = event.clientX;
-        overlay.cy = event.clientY;
+     $("#skycanvas").mousedown(function(event){
+        view.md = true;
+        view.cx = event.clientX;
+        view.cy = event.clientY;
     
         });
       $("#skycanvas").mousemove(function(event){
-        if(overlay.md){
-        overlay.translate((overlay.cx - event.clientX)/200.0,0,0);
-        overlay.translate(0,(-overlay.cy + event.clientY)/200.0, 0);
-        overlay.cx = event.clientX;
-        overlay.cy = event.clientY;
+        if(view.md){
+	        view.translate((view.cx - event.clientX)/200.0,0,0);
+	        view.translate(0,(-view.cy + event.clientY)/200.0, 0);
+	        view.cx = event.clientX;
+	        view.cy = event.clientY;
 
         }
         });
- 
-    if(window.addEventListener)
-		document.getElementById('skycanvas').addEventListener('DOMMouseScroll', moveObject, false);
-	//for IE/OPERA etc
-	document.getElementById('skycanvas').onmousewheel = moveObject;
       $("#skycanvas").mouseup(function(){
-        overlay.md = false;
-		bb = overlay.returnBounds()		
-		if(bb.RAMin < 0)		
-				bb.RAMin = 0;
-		if(!overlay.withinSpan(bb)){
-				overlay.getImageArray(bb)
-		}
-		
+        view.md = false;
         });
-		if(bb.RAMin < 0)		
-				bb.RAMin = 0;
-
-		overlay.getImageArray(bb)*/
+		
   }	
   $(document).ready(function(){
   	startStuff();
@@ -174,7 +163,7 @@
 </head>
 <body id= "rawr">
 	<div style="position: absolute; top: 20px; left: 30px;">
-		<canvas id="skycanvas2" width="1024px" height="1024px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: 10">Test</canvas>
+		<canvas id="skycanvas2" width="1024px" height="1024px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: -10">Test</canvas>
 		<canvas id="skycanvas" width= "1024px" height="1024px" style="border: solid 1px black; position: absolute; left: 1px; top: 1px">Test</canvas>
 	</div>
 

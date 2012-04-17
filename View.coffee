@@ -8,7 +8,9 @@ class View
 		@camera = {"x": 0.0, "y":0.0, "z":2.414213562}
 		@displayColor = {"R": 0, "G": 0, "B":0, "A":1}
 	requestSDSS: ()->
-		@overlays.push(new SDSSOverlay(@gl))
+		temp = new SDSSOverlay(@gl)
+		temp.requestImages(@span)
+		@overlays.push(temp)
 	requestFIRST: ()->
 		temp = new Overlay(@gl)
 		temp.requestImages(@span)
@@ -69,7 +71,7 @@ class View
 		height = width = @camera.z/2.414213562*1.8*.512;
 		boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2};
 		return boundingBox;
-	scrolling:(event)->
+	scrolling:(event)=>
 		delta = 0;
 		if (!event) 
 			event = window.event;
