@@ -10,7 +10,9 @@ class View
 	requestSDSS: ()->
 		@overlays.push(new SDSSOverlay(@gl))
 	requestFIRST: ()->
-		@overlays.push(new Overlay(@gl))
+		temp = new Overlay(@gl)
+		temp.requestImages(@span)
+		@overlays.push(temp)
 	requestBox:(cb)->
 		@overlays.push(new BoxOverlay(@canvas2d))
 	translate:(x,y,z)->
@@ -63,21 +65,21 @@ class View
 	assume this
 	###
 	getBounds:()->
-		center = {'RA':-@camera.x*.256, 'DEC':-@camera.y*.256}
-		height = width = @z/2.414213562*1.8*.512
-		boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2  }
-		return boundingBox
-    scrolling:(event)->
-    	delta = 0;
-	    if (!event) 
-	    	event = window.event;
-	    #normalize the delta
-	    if (event.wheelDelta)
-	    	#IE and Opera
-	        delta = event.wheelDelta / 60;
-	    else if (event.detail) 
-	    	delta = -event.detail / 2;
-	    if(delta > 0 && @camera.z >= 1.8)
-	    	@translate(0,0,-.3)
-	    else if(delta <= 0)
-	    	@translate(0,0,.3)
+		center = {'RA':-@camera.x*.256, 'DEC':-@camera.y*.256};
+		height = width = @camera.z/2.414213562*1.8*.512;
+		boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2};
+		return boundingBox;
+	scrolling:(event)->
+		delta = 0;
+		if (!event) 
+			event = window.event;
+		#normalize the delta
+		if (event.wheelDelta)
+			#IE and Opera
+			delta = event.wheelDelta / 60;
+		else if (event.detail) 
+			delta = -event.detail / 2;
+		if(delta > 0 && @camera.z >= 1.8)
+			@translate(0,0,-.3)
+		else if(delta <= 0)
+			@translate(0,0,.3)

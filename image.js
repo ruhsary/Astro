@@ -186,7 +186,6 @@ Overlay = (function() {
   };
 
   Overlay.prototype.requestImages = function(span) {
-    $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', span, this.insertImages, 'json');
     return this.insertImages(['00000+00000E.fits.jpg']);
   };
 

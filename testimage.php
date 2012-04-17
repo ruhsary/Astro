@@ -9,6 +9,7 @@
 <script src="J3DI.js?13213" type="text/javascript"> </script>
 <script src="J3DIMath.js" type="text/javascript"> </script>
 <script src="BoxOverlay.js" type="text/javascript"> </script>
+<script src="View.js" type="text/javascript"> </script>
 <script id="fshader" type="x-shader/x-fragment">
         precision highp float;
 	  
@@ -121,11 +122,15 @@
 	gl.height = 1024;
     gl.mvMatrix.makeIdentity();
     gl.mvMatrix.translate(0,0,0);
-	overlay = new Overlay(gl)
+    var canvas = document.getElementById('skycanvas2');
+    var ctx = canvas.getContext("2d");
+	var view = new View(gl, ctx)
+	view.display();
+	view.requestFIRST();
     //console.log("{RAMin: "+ bb.RAMin+ ", RAMax: "+bb.RAMax+", DECMax: "+ bb.DecMax+", DECMin: "+bb.DecMin+"}")
 	
 	    setInterval(function() {
-
+	    	view.display();
 						}, 15);
  /*     $("#skycanvas").mousedown(function(event){
         overlay.md = true;

@@ -39,7 +39,10 @@ View = (function() {
   };
 
   View.prototype.requestFIRST = function() {
-    return this.overlays.push(new Overlay(this.gl));
+    var temp;
+    temp = new Overlay(this.gl);
+    temp.requestImages(this.span);
+    return this.overlays.push(temp);
   };
 
   View.prototype.requestBox = function(cb) {
@@ -73,29 +76,37 @@ View = (function() {
   };
 
   View.prototype.requestBoundExpansion = function(side) {
+    var overlay, _i, _len, _ref, _results;
     if (side === 1) {
       this.requestBounds.RAMin = this.span.RAMin;
       this.requestBounds.RAMax = this.span.RAMax;
       this.requestBounds.DecMin = this.span.DecMax;
-      return this.requestBounds.DecMax = this.span.DecMax = this.span.DecMax + .512;
+      this.requestBounds.DecMax = this.span.DecMax = this.span.DecMax + .512;
     } else if (side === 3) {
       this.requestBounds.RAMin = this.span.RAMin;
       this.requestBounds.RAMax = this.span.RAMax;
       this.requestBounds.DecMax = this.span.DecMin;
-      return this.requestBounds.DecMin = this.span.DecMin = this.span.DecMin(-.512);
+      this.requestBounds.DecMin = this.span.DecMin = this.span.DecMin(-.512);
     } else if (side === 2) {
       this.requestBounds.DecMax = this.span.DecMax;
       this.requestBounds.DecMin = this.span.DecMin;
       this.requestBounds.RAMax = this.span.RAMin;
-      return this.requestBounds.RAMin = this.span.RAMin = this.span.RAMin - .512;
+      this.requestBounds.RAMin = this.span.RAMin = this.span.RAMin - .512;
     } else if (side === 4) {
       this.requestBounds.DecMax = this.span.DecMax;
       this.requestBounds.DecMin = this.span.DecMin;
       this.requestBounds.RAMin = this.span.RAMax;
-      return this.requestBounds.RAMax = this.span.RAMax = this.span.RAMax + .512;
+      this.requestBounds.RAMax = this.span.RAMax = this.span.RAMax + .512;
     } else {
-
+      return;
     }
+    _ref = this.overlays;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      overlay = _ref[_i];
+      _results.push(overlay.requestImages(this.requestBounds));
+    }
+    return _results;
   };
 
   /*
@@ -112,30 +123,30 @@ View = (function() {
       'RA': -this.camera.x * .256,
       'DEC': -this.camera.y * .256
     };
-    height = width = this.z / 2.414213562 * 1.8 * .512;
+    height = width = this.camera.z / 2.414213562 * 1.8 * .512;
     boundingBox = {
       'RAMin': center.RA - width / 2,
       'RAMax': center.RA + width / 2,
       'DecMin': center.DEC - height / 2,
       'DecMax': center.DEC + height / 2
     };
-    return boundingBox({
-      scrolling: function(event) {
-        var delta;
-        delta = 0;
-        if (!event) event = window.event;
-        if (event.wheelDelta) {
-          delta = event.wheelDelta / 60;
-        } else if (event.detail) {
-          delta = -event.detail / 2;
-        }
-        if (delta > 0 && this.camera.z >= 1.8) {
-          return this.translate(0, 0, -.3);
-        } else if (delta <= 0) {
-          return this.translate(0, 0, .3);
-        }
-      }
-    });
+    return boundingBox;
+  };
+
+  View.prototype.scrolling = function(event) {
+    var delta;
+    delta = 0;
+    if (!event) event = window.event;
+    if (event.wheelDelta) {
+      delta = event.wheelDelta / 60;
+    } else if (event.detail) {
+      delta = -event.detail / 2;
+    }
+    if (delta > 0 && this.camera.z >= 1.8) {
+      return this.translate(0, 0, -.3);
+    } else if (delta <= 0) {
+      return this.translate(0, 0, .3);
+    }
   };
 
   return View;

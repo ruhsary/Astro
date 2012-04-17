@@ -140,7 +140,7 @@ class Overlay
     @pushTexture(newPane) #Pushes texture onto the indices / vertices stack to be called later.
     @panes.push(newPane) #Panes to be displayed, at this point this image is ready to be displayed.
   requestImages:(span)->
-    $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', span, @insertImages, 'json')
+    #$.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', span, @insertImages, 'json')
     #TODO: SEND THIS TO OUTER CLASS
     @insertImages(['00000+00000E.fits.jpg']) 
   insertImages:(arr)=>
