@@ -154,28 +154,6 @@
       if (matches[4] === '-') return this.DEC = 0 - this.DEC;
     };
 
-    /*
-      The layout is a bunch of panes placed based on their DEC and RA:
-      
-          0   1   2   3   4   5   6
-      0  NUL R1  R2  R3  R4  R5  R6
-      
-      1  D1  P1  P2  UN  P3  P4  P5
-      
-      2  D2 .......................
-      
-      3  D3 .......................
-      
-      4  D4 .......................
-      
-      5  D5 ......................
-      
-      So we create a 2 dimensional array where each Panel can be placed
-      within 1-N and the RA is in the 0th row, while the DEC is defined in the
-      0th column.
-    */
-
-
     return Pane;
 
   })();
@@ -188,7 +166,6 @@
       this.insertImages = __bind(this.insertImages, this);
 
       this.constructPane = __bind(this.constructPane, this);
-      this.type = "FIRST";
       this.span = {
         'RAMin': 0,
         'RAMax': 0,
@@ -196,8 +173,6 @@
         'DecMax': 0
       };
       this.gl = gl;
-      this.x = this.y = this.z = 0;
-      this.z = 2.414213562;
       this.index = 0;
       this.indices = [];
       this.textureCoords = [];
@@ -210,12 +185,6 @@
       };
       this.ready = false;
     }
-
-    Overlay.prototype.translate = function(x, y, z) {
-      if (-this.x - x > 0) this.x += x;
-      if (this.y + y > -90 && this.y + y < 90) this.y += y;
-      return this.z += z;
-    };
 
     Overlay.prototype.constructPane = function(image) {
       var newPane;
@@ -303,9 +272,8 @@
       return this.panes = [];
     };
 
-    Overlay.prototype.display = function() {
+    Overlay.prototype.display = function(view) {
       var i, indexObject, pane, texCoordObject, vertexObject, _i, _len, _ref, _results;
-      this.gl.uniform1i(this.gl.getUniformLocation(this.gl.program, this.type), 0);
       texCoordObject = this.gl.createBuffer();
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, texCoordObject);
       this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.textureCoords), this.gl.STATIC_DRAW);
@@ -331,10 +299,10 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         pane = _ref[_i];
-        if (pane.texture && this.withinView(pane)) {
+        if (pane.texture && this.withinView(view, pane)) {
           this.gl.bindTexture(this.gl.TEXTURE_2D, pane.texture);
           this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, i);
-        } else if (this.withinView(pane)) {
+        } else if (this.withinView(view, pane)) {
           pane.createTexture(this.gl);
           this.gl.bindTexture(this.gl.TEXTURE_2D, pane.texture);
           this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, i);
@@ -348,9 +316,7 @@
       return _results;
     };
 
-    Overlay.prototype.withinView = function(pane) {
-      var view;
-      view = this.returnBounds();
+    Overlay.prototype.withinView = function(view, pane) {
       return (view.RAMax > (pane.RA - .512) && view.RAMin < (pane.RA + .512)) && (view.DecMax > (pane.DEC - .512) && view.DecMin < (pane.DEC + .512));
     };
 
@@ -358,25 +324,18 @@
       return (bound.RAMax < this.span.RAMax) && (bound.RAMin > this.span.RAMin) && (bound.DecMax < this.span.DecMax) && (bound.DecMin > this.span.DecMin);
     };
 
-    Overlay.prototype.returnBounds = function() {
-      var boundingBox, center, height, width;
-      center = {
-        'RA': -this.x * .256,
-        'DEC': -this.y * .256
-      };
-      height = width = this.z / 1.8 * .512;
-      boundingBox = {
-        'RAMin': center.RA - width / 2,
-        'RAMax': center.RA + width / 2,
-        'DecMin': center.DEC - height / 2,
-        'DecMax': center.DEC + height / 2
-      };
-      return boundingBox;
-    };
-
     return Overlay;
 
   })();
+
+  /*
+    returnBounds:()->
+      center = {'RA':-@x*.256, 'DEC':-@y*.256}
+      height = width = @z/1.8*.512
+      boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2  }
+      return boundingBox
+  */
+
 
   SDSSOverlay = (function(_super) {
 

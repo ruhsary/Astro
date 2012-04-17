@@ -10,25 +10,20 @@
 <script src="J3DIMath.js" type="text/javascript"> </script>
 <script src="BoxOverlay.js" type="text/javascript"> </script>
 <script id="fshader" type="x-shader/x-fragment">
-    
-		#ifdef GL_ES
-    precision highp float;
-    #endif
+        precision highp float;
 	  
 	  uniform sampler2D FIRST;
 	  uniform sampler2D SDSS;
       uniform float alpha;
 	  varying vec2 vTextureCoord;
   	  varying vec2 uTextureCoord;
-
-    void main(void) {
-    vec4 textureColor = texture2D(FIRST, vec2(vTextureCoord.s, vTextureCoord.t));
-    gl_FragColor = vec4(textureColor.rgb, textureColor.a * alpha);
-	//gl_FragColor = texture2D(FIRST, vec2(vTextureCoord.s, vTextureCoord.t));//	vec4(1.0, 1.0, 1.0, 1.0);
-	//gl_FragColor += .5*texture2D(SDSS, vec2(uTextureCoord.s, uTextureCoord.t));    
-		
-}
-
+	   void main(void) {
+		    vec4 textureColor = texture2D(FIRST, vec2(vTextureCoord.s, vTextureCoord.t));
+		    gl_FragColor = vec4(textureColor.rgb, textureColor.a * alpha);
+			//gl_FragColor = texture2D(FIRST, vec2(vTextureCoord.s, vTextureCoord.t));//	vec4(1.0, 1.0, 1.0, 1.0);
+			//gl_FragColor += .5*texture2D(SDSS, vec2(uTextureCoord.s, uTextureCoord.t));    
+				
+		}
 </script>
 
 <script id="vshader" type="x-shader/x-vertex">
@@ -137,18 +132,7 @@
     //console.log("{RAMin: "+ bb.RAMin+ ", RAMax: "+bb.RAMax+", DECMax: "+ bb.DecMax+", DECMin: "+bb.DecMin+"}")
 	
 	    setInterval(function() {
-				gl.viewport(0, 0, width, height);
-				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // clear color and depth
-				gl.clearColor(0.0,0.0,0.0,1.0);
-				gl.perspectiveMatrix.makeIdentity();
-				gl.perspectiveMatrix.perspective(45, 1, 0.01, 100);
-				gl.perspectiveMatrix.lookat(overlay.x, overlay.y, overlay.z,overlay.x, overlay.y, 0, 0, 1, 0);
-				overlay.display()
-				gl.flush();
-				var canvas = document.getElementById("skycanvas");
-				var ctx = canvas.getContext("2d");
-				//ctx.fillStyle("#ff00ff");
-				//ctx.fillRect(0,0,500,500);
+
 						}, 15);
       $("#skycanvas").mousedown(function(event){
         overlay.md = true;

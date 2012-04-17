@@ -47,3 +47,5 @@ class Util
 		degreeHeight = pixelHeight*scale/3600.0
 		degreePoint = {'x':(degreeCenterPoint.x - degreeWidth), 'y':(degreeCenterPoint.y + degreeHeight)}
 		return degreePoint
+
+

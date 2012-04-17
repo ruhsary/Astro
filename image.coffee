@@ -111,26 +111,7 @@ class Pane
       @DEC = @DEC + minutes/60.0
       if(matches[4] == '-')
         @DEC = 0 - @DEC
-  ###
-  The layout is a bunch of panes placed based on their DEC and RA:
-  
-      0   1   2   3   4   5   6
-  0  NUL R1  R2  R3  R4  R5  R6
-  
-  1  D1  P1  P2  UN  P3  P4  P5
-  
-  2  D2 .......................
-  
-  3  D3 .......................
-  
-  4  D4 .......................
-  
-  5  D5 ......................
-  
-  So we create a 2 dimensional array where each Panel can be placed
-  within 1-N and the RA is in the 0th row, while the DEC is defined in the
-  0th column.
-  ###
+
 ################################################################################
 #Overlay:
 # constructor: Takes a gl object to put textures into.
@@ -142,11 +123,7 @@ class Pane
 ################################################################################
 class Overlay
   constructor:(gl)->
-    @type = "FIRST"
-    @span = {'RAMin':0 , 'RAMax':0, 'DecMin':0, 'DecMax':0}
     @gl = gl
-    @x = @y = @z = 0
-    @z = 2.414213562
     @index = 0
     @indices = []
     @textureCoords = []
@@ -154,14 +131,6 @@ class Overlay
     @opacity = 1.0
     @preLoader = new ImageLoader()
     @panes = []
-    @onReady = ()-> return null
-    @ready = false
-  translate:(x,y,z)->
-    if(-@x - x > 0)
-      @x += x
-    if(@y + y > -90 and @y + y < 90)
-      @y += y
-    @z += z
   constructPane:(image)=>
     newPane = new Pane(image)
     newPane.weightedPoint(image.src)
@@ -220,8 +189,7 @@ class Overlay
     @opacity = 1.0
    # @preLoader.clear()
     @panes = []
-  display:()->
-    @gl.uniform1i(@gl.getUniformLocation(@gl.program, @type), 0);
+  display:(view)->
     texCoordObject = @gl.createBuffer();
     @gl.bindBuffer(@gl.ARRAY_BUFFER, texCoordObject);
     @gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(@textureCoords), @gl.STATIC_DRAW);
@@ -248,10 +216,10 @@ class Overlay
 
     i = 0
     for pane in @panes
-      if(pane.texture and @withinView(pane))
+      if(pane.texture and @withinView(view,pane))
         @gl.bindTexture(@gl.TEXTURE_2D, pane.texture);
         @gl.drawElements(@gl.TRIANGLES, 6, @gl.UNSIGNED_SHORT, i);  
-      else if(@withinView(pane))
+      else if(@withinView(view,pane))
         pane.createTexture(@gl)
         @gl.bindTexture(@gl.TEXTURE_2D, pane.texture);
         @gl.drawElements(@gl.TRIANGLES, 6, @gl.UNSIGNED_SHORT, i);  
@@ -262,19 +230,15 @@ class Overlay
       i+=12
    # @gl.flush();
    # @gl.bindBuffer(@gl.ELEMENT_ARRAY_BUFFER, null);
-  withinView:(pane)->
-    view = @returnBounds()
+  withinView:(view,pane)->
     return ((view.RAMax > (pane.RA-.512) and view.RAMin < (pane.RA+.512)) and (view.DecMax > (pane.DEC-.512) and view.DecMin < (pane.DEC+.512)))
   withinSpan:(bound)->
     #console.log("RA:{#{bound.RAMin}, #{bound.RAMax}} Dec: {#{bound.DecMin}, #{bound.DecMax}}~~~~Span: RA:{#{@span.RAMin}, #{@span.RAMax}} Dec: {#{@span.DecMin}, #{@span.DecMax}}")
     return (bound.RAMax < @span.RAMax) and (bound.RAMin > @span.RAMin) and (bound.DecMax < @span.DecMax) and (bound.DecMin > @span.DecMin)
   #Returns viewBound
-  returnBounds:()->
-    center = {'RA':-@x*.256, 'DEC':-@y*.256}
-    height = width = @z/1.8*.512
-    boundingBox = {'RAMin': center.RA-width/2,'RAMax': center.RA+width/2, 'DecMin': center.DEC-height/2, 'DecMax': center.DEC+height/2  }
-    return boundingBox
-  
+ ###
+
+ ### 
 class SDSSOverlay extends Overlay    
   constructPane:(image)=>
     newPane = new Pane(image)
