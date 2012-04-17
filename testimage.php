@@ -112,23 +112,22 @@
     var c = document.getElementById("skycanvas");
 		c.style.width = "1024px";
 		c.style.height = "1024px";
-	var box = new BoxOverlay("skycanvas2")
+/*	var box = new BoxOverlay("skycanvas2")
 	box.onBox = function(box){
 		alert(box.start.x);
-	}
+	}*/
     gl = init();
 	gl.width = 1024;
 	gl.height = 1024;
     gl.mvMatrix.makeIdentity();
     gl.mvMatrix.translate(0,0,0);
 	overlay = new Overlay(gl)
-    var bb=overlay.returnBounds()    
     //console.log("{RAMin: "+ bb.RAMin+ ", RAMax: "+bb.RAMax+", DECMax: "+ bb.DecMax+", DECMin: "+bb.DecMin+"}")
 	
 	    setInterval(function() {
 
 						}, 15);
-      $("#skycanvas").mousedown(function(event){
+ /*     $("#skycanvas").mousedown(function(event){
         overlay.md = true;
         overlay.cx = event.clientX;
         overlay.cy = event.clientY;
@@ -161,7 +160,7 @@
 		if(bb.RAMin < 0)		
 				bb.RAMin = 0;
 
-		overlay.getImageArray(bb)
+		overlay.getImageArray(bb)*/
   }	
   $(document).ready(function(){
   	startStuff();

@@ -179,23 +179,15 @@ Overlay = (function() {
     var newPane;
     newPane = new Pane(image);
     newPane.weightedPoint(image.src);
-    this.pushBounds(newPane);
     if (image.height !== 1024 || image.width !== 1024) return;
     newPane.createTexture(this.gl);
     this.pushTexture(newPane);
     return this.panes.push(newPane);
   };
 
-  Overlay.prototype.getImageArray = function(boundingBox) {
-    this.insertImages(['00000+00000E.fits.jpg']);
-    if (this.span.RAMax < boundingBox.RAMax) this.span.RAMax = boundingBox.RAMax;
-    if (this.span.RAMin > boundingBox.RAMin) this.span.RAMin = boundingBox.RAMin;
-    if (this.span.DecMax < boundingBox.DecMax) {
-      this.span.DecMax = boundingBox.DecMax;
-    }
-    if (this.span.DecMin > boundingBox.DecMin) {
-      return this.span.DecMin = boundingBox.DecMin;
-    }
+  Overlay.prototype.requestImages = function(span) {
+    $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', span, this.insertImages, 'json');
+    return this.insertImages(['00000+00000E.fits.jpg']);
   };
 
   Overlay.prototype.insertImages = function(arr) {
@@ -206,19 +198,6 @@ Overlay = (function() {
       _results.push(this.preLoader.pushImage(url, this.constructPane));
     }
     return _results;
-  };
-
-  Overlay.prototype.pushBounds = function(pane) {
-    if ((pane.RA + .256) > this.span.RAMax) {
-      this.span.RAMax = pane.RA + .256;
-    } else if ((pane.RA - .256) < this.span.RAMin) {
-      this.span.RAMin = pane.RA - .256;
-    }
-    if ((pane.Dec + .256) > this.span.DecMax) {
-      return this.span.DecMax = pane.Dec + .256;
-    } else if ((pane.Dec - .256) < this.span.DecMin) {
-      return this.span.DecMin = pane.Dec - .256;
-    }
   };
 
   Overlay.prototype.pushTexture = function(pane) {
@@ -371,3 +350,10 @@ SDSSOverlay = (function(_super) {
   return SDSSOverlay;
 
 })(Overlay);
+
+({
+  requestImages: function(span) {
+    $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', span, this.insertImages, 'json');
+    return this.insertImages(['00000+00000E.fits.jpg']);
+  }
+});

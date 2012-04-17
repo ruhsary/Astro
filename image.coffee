@@ -134,7 +134,6 @@ class Overlay
   constructPane:(image)=>
     newPane = new Pane(image)
     newPane.weightedPoint(image.src)
-    @pushBounds(newPane)
     if(image.height != 1024 or image.width != 1024)
       return
     newPane.createTexture(@gl)
@@ -147,15 +146,6 @@ class Overlay
   insertImages:(arr)=>
     for url in arr
       @preLoader.pushImage(url, @constructPane)
-  pushBounds:(pane)->
-    if((pane.RA+.256) >  @span.RAMax)
-      @span.RAMax = pane.RA+.256
-    else if((pane.RA - .256) <  @span.RAMin)
-      @span.RAMin = pane.RA-.256
-    if((pane.Dec+.256) >  @span.DecMax)
-      @span.DecMax = pane.Dec+.256
-    else if((pane.Dec - .256) <  @span.DecMin)
-      @span.DecMin = pane.Dec-.256
   pushTexture:(pane)->
     right = 1.0 - Math.round(pane.RA/.512)*2
     left = -1.0 - Math.round(pane.RA/.512)*2
@@ -252,7 +242,10 @@ class SDSSOverlay extends Overlay
         fun = @constructPane
         return (image)->(fun(image, raf,decf))
         ))(ra,dec))
-
+requestImages:(span)->
+    $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', span, @insertImages, 'json')
+    #TODO: SEND THIS TO OUTER CLASS
+    @insertImages(['00000+00000E.fits.jpg']) 
    # @gl.flush();
 ################################################################################
 #TESTING STUFF BELOW

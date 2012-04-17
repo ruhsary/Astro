@@ -54,6 +54,8 @@ class View
 			@requestBounds.RAMax = @span.RAMax = @span.RAMax + .512
 		else
 			return
+		for overlay in @overlays
+			overlay.requestImages(@requestBounds)
 	###
 	FUNCTION: getBounds()
 
