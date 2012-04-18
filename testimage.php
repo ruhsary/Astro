@@ -9,6 +9,7 @@
 <script src="J3DI.js?13213" type="text/javascript"> </script>
 <script src="J3DIMath.js" type="text/javascript"> </script>
 <script src="BoxOverlay.js" type="text/javascript"> </script>
+<script src="Util.js" type="text/javascript"> </script>
 <script src="View.js" type="text/javascript"> </script>
 <script id="fshader" type="x-shader/x-fragment">
         precision highp float;
@@ -124,9 +125,12 @@
     gl.mvMatrix.translate(0,0,0);
     var canvas = document.getElementById('skycanvas2');
     var ctx = canvas.getContext("2d");
-	var view = new View(gl, ctx)
+	var view = new View(gl, 'skycanvas2')
 	view.display();
-	view.requestFIRST();
+	//view.requestFIRST();
+	view.requestBox(function(box){
+		alert(Util.prototype.pixelSpaceToDegreeSpace(box.start, {'x':0, 'y':0 }, {'x':512, 'y':512 }, 1.8).x);
+	});
 	if(window.addEventListener)
 		document.getElementById('skycanvas').addEventListener('DOMMouseScroll', view.scrolling, false);
 	//for IE/OPERA etc
@@ -135,7 +139,7 @@
 	
 	    setInterval(function() {
 	    	view.display();
-						}, 15);
+						}, 150);
      $("#skycanvas").mousedown(function(event){
         view.md = true;
         view.cx = event.clientX;
@@ -163,7 +167,7 @@
 </head>
 <body id= "rawr">
 	<div style="position: absolute; top: 20px; left: 30px;">
-		<canvas id="skycanvas2" width="1024px" height="1024px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: -10">Test</canvas>
+		<canvas id="skycanvas2" width="1024px" height="1024px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: 10">Test</canvas>
 		<canvas id="skycanvas" width= "1024px" height="1024px" style="border: solid 1px black; position: absolute; left: 1px; top: 1px">Test</canvas>
 	</div>
 

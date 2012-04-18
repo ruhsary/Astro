@@ -57,7 +57,7 @@ Util = (function() {
       return null;
     }
     pixelWidth = pixelPoint.x - pixelCenter.x;
-    pixelHeight = pixelHeight.y - pixelHeight.y;
+    pixelHeight = pixelPoint.y - pixelCenter.y;
     /*Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds
     */
 

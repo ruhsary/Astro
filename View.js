@@ -51,7 +51,10 @@ View = (function() {
   };
 
   View.prototype.requestBox = function(cb) {
-    return this.overlays.push(new BoxOverlay(this.canvas2d));
+    var temp;
+    temp = new BoxOverlay(this.canvas2d);
+    temp.onBox = cb;
+    return this.overlays.push(temp);
   };
 
   View.prototype.translate = function(x, y, z) {

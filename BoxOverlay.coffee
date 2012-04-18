@@ -29,8 +29,7 @@ class BoxOverlay
         $('#'+ canvasid).mousemove((event)=>
             if(@draw and @enabled)
                 @end = @canvas.relMouseCoords(event)
-                @ctx.clearRect(0,0, @canvas.width, @canvas.height);
-                @ctx.fillRect(@start.x, @start.y, @end.x-@start.x, @end.y-@start.y);
+                
         )
         $('#'+ canvasid).mouseup((event)=>
             if(!@enabled)
@@ -41,4 +40,8 @@ class BoxOverlay
                 @onBox({start: @start, end:@end})
             @draw = false
         )
+    display:(bound)->
+        if @draw
+            @ctx.clearRect(0,0, @canvas.width, @canvas.height);
+            @ctx.fillRect(@start.x, @start.y, @end.x-@start.x, @end.y-@start.y);
   

@@ -16,7 +16,9 @@ class View
 		temp.requestImages(@span)
 		@overlays.push(temp)
 	requestBox:(cb)->
-		@overlays.push(new BoxOverlay(@canvas2d))
+		temp = new BoxOverlay(@canvas2d)
+		temp.onBox = cb;
+		@overlays.push(temp)
 	translate:(x,y,z)->
 	    if(-@camera.x - x > 0)
 	      @camera.x += x
