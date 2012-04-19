@@ -138,17 +138,22 @@
 	    	view.display();
 						}, 150);
   
-		
+view.register('translate', function(v){
+  	$("#RA").html("RA :"+ (-v.camera.x*.256));
+  	$("#DEC").html("DEC :"+(-v.camera.y*.256));
+  })
   }	
+
 
   $(document).ready(function(){
   	startStuff();
+
   })
 </script>
 </head>
 <body id= "rawr">
 
-	<div style="width: 512px; height:512px; float:left; display:inline-block;">
+	<div style="width: 512px; height:512px; float:left; display:inline-block; padding:20px">
 		<canvas id="skycanvas2" width="512px" height="512px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: 10">Test</canvas>
 		<canvas id="skycanvas" width= "512px" height="512px" style="border: solid 1px black; position: absolute; left: 1px; top: 1px">Test</canvas>
 	</div>
@@ -165,7 +170,30 @@
           <input type="radio" id="radio1" name="radio" value='2'/><label for="radio1">Pan</label>
           <input type="radio" id="radio2" name="radio" value='1'/><label for="radio2">Box</label>
     	</div>
-
+	<div style="display:inline-block; width:300px; padding-top:20px;">
+		<div class="ui-widget">
+			<div class="ui-state-default ui-corner-all">
+			<p><span class="ui-icon ui-icon-script" style="float: left; margin-right: .3em;"></span>
+			<span id="RA">RA: 0</span></p>
+			</div>
+		</div>
+	</div>
+	<div style="display:inline-block; width:300px; padding-top:20px;">
+		<div class="ui-widget">
+			<div class="ui-state-default ui-corner-all">
+			<p><span class="ui-icon ui-icon-script" style="float: left; margin-right: .3em;"></span>
+			<span id="DEC">DEC: 0</span></p>
+			</div>
+		</div>
+	</div>
+	<div style="display:inline-block; width:300px; padding-top:20px;">
+		<div class="ui-widget">
+			<div class="ui-state-default ui-corner-all">
+			<p><span class="ui-icon ui-icon-script" style="float: left; margin-right: .3em;"></span>
+			<span id="BOUND">{Bounds}</span></p>
+			</div>
+		</div>
+	</div>
 	<!--scripts-->
     <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
