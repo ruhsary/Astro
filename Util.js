@@ -52,22 +52,49 @@ Util = (function() {
 
 
   Util.prototype.pixelSpaceToDegreeSpace = function(pixelPoint, degreeCenterPoint, pixelCenter, scale) {
-    var degreeHeight, degreePoint, degreeWidth, pixelHeight, pixelWidth;
+    var checkTest, degreeHeight, degreePoint, degreeWidth, pixelHeight, pixelWidth;
     if (!((pixelPoint.x != null) && (pixelPoint.y != null) && (degreeCenterPoint.x != null) && (degreeCenterPoint.y != null))) {
       return null;
     }
     pixelWidth = pixelPoint.x - pixelCenter.x;
     pixelHeight = pixelPoint.y - pixelCenter.y;
+    checkTest = 1024 / 512;
     /*Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds
     */
 
-    degreeWidth = pixelWidth * scale / 3600.0;
-    degreeHeight = pixelHeight * scale / 3600.0;
+    degreeWidth = pixelWidth * scale / 3600.0 * checkTest;
+    degreeHeight = pixelHeight * scale / 3600.0 * checkTest;
     degreePoint = {
       'x': degreeCenterPoint.x - degreeWidth,
       'y': degreeCenterPoint.y + degreeHeight
     };
     return degreePoint;
+  };
+
+  Util.prototype.hookEvent = function(element, eventName, callback) {
+    if (typeof element === "string") element = document.getElementById(element);
+    if (element === null) return;
+    if (element.addEventListener) {
+      if (eventName === 'mousewheel') {
+        element.addEventListener('DOMMouseScroll', callback, false);
+      }
+      return element.addEventListener(eventName, callback, false);
+    } else if (element.attachEvent) {
+      return element.attachEvent("on" + eventName, callback);
+    }
+  };
+
+  Util.prototype.unhookEvent = function(element, eventName, callback) {
+    if (typeof element === "string") element = document.getElementById(element);
+    if (element === null) return;
+    if (element.removeEventListener) {
+      if (eventName === 'mousewheel') {
+        element.removeEventListener('DOMMouseScroll', callback, false);
+      }
+      return element.removeEventListener(eventName, callback, false);
+    } else if (element.detachEvent) {
+      return element.detachEvent("on" + eventName, callback);
+    }
   };
 
   return Util;

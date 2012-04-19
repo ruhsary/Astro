@@ -1,24 +1,41 @@
 class View
-	constructor: (canvas3dctx, canvas2dctx)->
+	@BOX = 1
+	@PAN = 2
+	constructor: (canvas3dctx, canvas2dctx)->		
 		@span = {'RAMin':0 , 'RAMax':.256, 'DecMin':-.256, 'DecMax':.256 }
 		@requestBounds = {'RAMin':0 , 'RAMax':0, 'DecMin':0, 'DecMax':0 }
+		@sdss = null
 		@overlays = []
+		@first = null
+		@box = null
 		@canvas2d = canvas2dctx
 		@gl = canvas3dctx
 		@camera = {"x": 0.0, "y":0.0, "z":2.414213562}
 		@displayColor = {"R": 0, "G": 0, "B":0, "A":1}
 	requestSDSS: ()->
-		temp = new SDSSOverlay(@gl)
-		temp.requestImages(@span)
-		@overlays.push(temp)
+		@sdss = new SDSSOverlay(@gl)
+		@sdss.requestImages(@span)
+		@overlays.push(@span)
 	requestFIRST: ()->
-		temp = new Overlay(@gl)
-		temp.requestImages(@span)
-		@overlays.push(temp)
+		@first = new Overlay(@gl)
+		@first.requestImages(@span)
+		@overlays.push(@first)
 	requestBox:(cb)->
-		temp = new BoxOverlay(@canvas2d)
-		temp.onBox = cb;
-		@overlays.push(temp)
+		@box = new BoxOverlay(@canvas2d)
+		@box.onBox = cb;
+		@overlays.push(@box)
+	changeMode:(mode)=>
+		if(mode == 1)
+			@box.setEvents("skycanvas2")
+			Util::unhookEvent('skycanvas2','mousewheel', @scrolling)
+		else if(mode == 2)
+			@overlays[0].setEvents("skycanvas2", this)
+			Util::hookEvent('skycanvas2','mousewheel', @scrolling)
+		else
+			canvas = document.getElementById('skycanvas2')
+			canvas.onmousemove = null
+			canvas.onmouseup = null
+			canvas.onmousedown = null
 	translate:(x,y,z)->
 	    if(-@camera.x - x > 0)
 	      @camera.x += x
@@ -26,7 +43,7 @@ class View
 	      @camera.y += y
 	    @camera.z += z
 	display:()->
-		@gl.viewport(0, 0, width, height);
+		@gl.viewport(0, 0, @gl.width, @gl.height);
 		@gl.clear(@gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT); # clear color and depth
 		@gl.clearColor(@displayColor.R,@displayColor.G,@displayColor.B,@displayColor.A);
 		@gl.perspectiveMatrix.makeIdentity();

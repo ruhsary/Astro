@@ -217,6 +217,23 @@ class Overlay
   withinSpan:(bound)->
     #console.log("RA:{#{bound.RAMin}, #{bound.RAMax}} Dec: {#{bound.DecMin}, #{bound.DecMax}}~~~~Span: RA:{#{@span.RAMin}, #{@span.RAMax}} Dec: {#{@span.DecMin}, #{@span.DecMax}}")
     return (bound.RAMax < @span.RAMax) and (bound.RAMin > @span.RAMin) and (bound.DecMax < @span.DecMax) and (bound.DecMin > @span.DecMin)
+  setEvents: (canvasid, view)->
+    canvas = document.getElementById(canvasid)
+    view = view
+    canvas.onmousedown = (event)=>
+      @md = true;
+      @cx = event.clientX;
+      @cy = event.clientY;
+
+    canvas.onmousemove = (event)=>
+      if(@md)
+        view.translate((@cx - event.clientX)/200.0,0,0);
+        view.translate(0,(-@cy + event.clientY)/200.0, 0);
+        @cx = event.clientX;
+        @cy = event.clientY;
+
+    canvas.onmouseup = (event)=>
+      @md = false;
   #Returns viewBound
  ###
 

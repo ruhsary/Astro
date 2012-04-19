@@ -3,7 +3,8 @@
 <html>
 <head>
     <title>Test Canvas</title>
-
+<link type="text/css" href="css/custom-theme/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<link href="css/bootstrap.css" rel="stylesheet">
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <script src="image.js?423" type="text/javascript"></script>
 <script src="J3DI.js?13213" type="text/javascript"> </script>
@@ -112,64 +113,62 @@
   var gl; 
   function startStuff() {
     var c = document.getElementById("skycanvas");
-		c.style.width = "1024px";
-		c.style.height = "1024px";
-/*	var box = new BoxOverlay("skycanvas2")
-	box.onBox = function(box){
-		alert(box.start.x);
-	}*/
-    gl = init();
-	gl.width = 1024;
-	gl.height = 1024;
+
+  gl = init();
+	gl.width = 512;
+	gl.height = 512;
     gl.mvMatrix.makeIdentity();
     gl.mvMatrix.translate(0,0,0);
     var canvas = document.getElementById('skycanvas2');
-    var ctx = canvas.getContext("2d");
+    
+	var ctx = canvas.getContext("2d");
 	var view = new View(gl, 'skycanvas2')
 	view.display();
-	//view.requestFIRST();
+	view.requestFIRST();
 	view.requestBox(function(box){
-		alert(Util.prototype.pixelSpaceToDegreeSpace(box.start, {'x':0, 'y':0 }, {'x':512, 'y':512 }, 1.8).x);
+		alert(Util.prototype.pixelSpaceToDegreeSpace(box.start, {'x':-view.camera.x*.256, 'y':-view.camera.y*.256 }, {'x':256, 'y':256 },  view.camera.z/2.414213562*1.8).x);
 	});
-	if(window.addEventListener)
-		document.getElementById('skycanvas').addEventListener('DOMMouseScroll', view.scrolling, false);
+
 	//for IE/OPERA etc
-	document.getElementById('skycanvas').onmousewheel = view.scrolling;
+
     //console.log("{RAMin: "+ bb.RAMin+ ", RAMax: "+bb.RAMax+", DECMax: "+ bb.DecMax+", DECMin: "+bb.DecMin+"}")
-	
+	$("#radioset").buttonset();
+	$('#radioset > input').click(function(){view.changeMode(parseInt(this.value));})
 	    setInterval(function() {
 	    	view.display();
 						}, 150);
-     $("#skycanvas").mousedown(function(event){
-        view.md = true;
-        view.cx = event.clientX;
-        view.cy = event.clientY;
-    
-        });
-      $("#skycanvas").mousemove(function(event){
-        if(view.md){
-	        view.translate((view.cx - event.clientX)/200.0,0,0);
-	        view.translate(0,(-view.cy + event.clientY)/200.0, 0);
-	        view.cx = event.clientX;
-	        view.cy = event.clientY;
-
-        }
-        });
-      $("#skycanvas").mouseup(function(){
-        view.md = false;
-        });
+  
 		
   }	
+
   $(document).ready(function(){
   	startStuff();
   })
 </script>
 </head>
 <body id= "rawr">
-	<div style="position: absolute; top: 20px; left: 30px;">
-		<canvas id="skycanvas2" width="1024px" height="1024px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: 10">Test</canvas>
-		<canvas id="skycanvas" width= "1024px" height="1024px" style="border: solid 1px black; position: absolute; left: 1px; top: 1px">Test</canvas>
-	</div>
 
+	<div style="width: 512px; height:512px; float:left; display:inline-block;">
+		<canvas id="skycanvas2" width="512px" height="512px" style="border: solid 1px black;position: absolute; left: 1px; top: 1px; z-index: 10">Test</canvas>
+		<canvas id="skycanvas" width= "512px" height="512px" style="border: solid 1px black; position: absolute; left: 1px; top: 1px">Test</canvas>
+	</div>
+	<div style="display:inline-block">
+		<div class="ui-widget">
+			<div class="ui-state-highlight ui-corner-all">
+			<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+			<strong>Hey!</strong> Sample ui-state-highlight style.</p>
+			</div>
+		</div>
+	</div>
+	   <div id="radioset">
+	   	  <input type="radio" id="radio0" name="radio" value='0'/><label for="radio0">None</label>
+          <input type="radio" id="radio1" name="radio" value='2'/><label for="radio1">Pan</label>
+          <input type="radio" id="radio2" name="radio" value='1'/><label for="radio2">Box</label>
+    	</div>
+
+	<!--scripts-->
+    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
 </body>
+
 </html>

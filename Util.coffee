@@ -42,10 +42,32 @@ class Util
 		    return null
 		pixelWidth = pixelPoint.x - pixelCenter.x
 		pixelHeight = pixelPoint.y - pixelCenter.y
+		checkTest = 1024/512
 		###Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds###
-		degreeWidth = pixelWidth*scale/3600.0
-		degreeHeight = pixelHeight*scale/3600.0
+		degreeWidth = pixelWidth*scale/3600.0*checkTest
+		degreeHeight = pixelHeight*scale/3600.0*checkTest
 		degreePoint = {'x':(degreeCenterPoint.x - degreeWidth), 'y':(degreeCenterPoint.y + degreeHeight)}
 		return degreePoint
+	hookEvent:(element, eventName, callback)->
+		if(typeof(element) == "string")
+			element = document.getElementById(element);
+		if(element == null)
+			return;
+		if(element.addEventListener)
+			if(eventName == 'mousewheel')
+				element.addEventListener('DOMMouseScroll', callback, false);  
+			element.addEventListener(eventName, callback, false);
+		else if(element.attachEvent)
+			element.attachEvent("on" + eventName, callback);
 
-
+	unhookEvent:(element, eventName, callback)->
+		if(typeof(element) == "string")
+			element = document.getElementById(element);
+		if(element == null)
+			return;
+		if(element.removeEventListener)
+			if(eventName == 'mousewheel')
+				element.removeEventListener('DOMMouseScroll', callback, false);  
+			element.removeEventListener(eventName, callback, false);
+		else if(element.detachEvent)
+			element.detachEvent("on" + eventName, callback);

@@ -291,6 +291,28 @@ Overlay = (function() {
     return (bound.RAMax < this.span.RAMax) && (bound.RAMin > this.span.RAMin) && (bound.DecMax < this.span.DecMax) && (bound.DecMin > this.span.DecMin);
   };
 
+  Overlay.prototype.setEvents = function(canvasid, view) {
+    var canvas,
+      _this = this;
+    canvas = document.getElementById(canvasid);
+    canvas.onmousedown = function(event) {
+      _this.md = true;
+      _this.cx = event.clientX;
+      return _this.cy = event.clientY;
+    };
+    canvas.onmousemove = function(event) {
+      if (_this.md) {
+        view.translate((_this.cx - event.clientX) / 200.0, 0, 0);
+        view.translate(0, (-_this.cy + event.clientY) / 200.0, 0);
+        _this.cx = event.clientX;
+        return _this.cy = event.clientY;
+      }
+    };
+    return canvas.onmouseup = function(event) {
+      return _this.md = false;
+    };
+  };
+
   return Overlay;
 
 })();

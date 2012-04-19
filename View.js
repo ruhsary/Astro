@@ -6,8 +6,14 @@ View = (function() {
 
   View.name = 'View';
 
+  View.BOX = 1;
+
+  View.PAN = 2;
+
   function View(canvas3dctx, canvas2dctx) {
     this.scrolling = __bind(this.scrolling, this);
+
+    this.changeMode = __bind(this.changeMode, this);
     this.span = {
       'RAMin': 0,
       'RAMax': .256,
@@ -20,7 +26,10 @@ View = (function() {
       'DecMin': 0,
       'DecMax': 0
     };
+    this.sdss = null;
     this.overlays = [];
+    this.first = null;
+    this.box = null;
     this.canvas2d = canvas2dctx;
     this.gl = canvas3dctx;
     this.camera = {
@@ -37,24 +46,37 @@ View = (function() {
   }
 
   View.prototype.requestSDSS = function() {
-    var temp;
-    temp = new SDSSOverlay(this.gl);
-    temp.requestImages(this.span);
-    return this.overlays.push(temp);
+    this.sdss = new SDSSOverlay(this.gl);
+    this.sdss.requestImages(this.span);
+    return this.overlays.push(this.span);
   };
 
   View.prototype.requestFIRST = function() {
-    var temp;
-    temp = new Overlay(this.gl);
-    temp.requestImages(this.span);
-    return this.overlays.push(temp);
+    this.first = new Overlay(this.gl);
+    this.first.requestImages(this.span);
+    return this.overlays.push(this.first);
   };
 
   View.prototype.requestBox = function(cb) {
-    var temp;
-    temp = new BoxOverlay(this.canvas2d);
-    temp.onBox = cb;
-    return this.overlays.push(temp);
+    this.box = new BoxOverlay(this.canvas2d);
+    this.box.onBox = cb;
+    return this.overlays.push(this.box);
+  };
+
+  View.prototype.changeMode = function(mode) {
+    var canvas;
+    if (mode === 1) {
+      this.box.setEvents("skycanvas2");
+      return Util.prototype.unhookEvent('skycanvas2', 'mousewheel', this.scrolling);
+    } else if (mode === 2) {
+      this.overlays[0].setEvents("skycanvas2", this);
+      return Util.prototype.hookEvent('skycanvas2', 'mousewheel', this.scrolling);
+    } else {
+      canvas = document.getElementById('skycanvas2');
+      canvas.onmousemove = null;
+      canvas.onmouseup = null;
+      return canvas.onmousedown = null;
+    }
   };
 
   View.prototype.translate = function(x, y, z) {
@@ -65,7 +87,7 @@ View = (function() {
 
   View.prototype.display = function() {
     var overlay, _i, _len, _ref;
-    this.gl.viewport(0, 0, width, height);
+    this.gl.viewport(0, 0, this.gl.width, this.gl.height);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.gl.clearColor(this.displayColor.R, this.displayColor.G, this.displayColor.B, this.displayColor.A);
     this.gl.perspectiveMatrix.makeIdentity();

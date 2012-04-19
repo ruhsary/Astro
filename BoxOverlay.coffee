@@ -21,17 +21,18 @@ class BoxOverlay
             canvasY = event.pageY - totalOffsetY
             return {x:canvasX, y:canvasY}
         @onBox = null
-        $('#'+ canvasid).mousedown((event)=>
+
+    setEvents:(canvasid)->
+        @canvas.onmousedown =(event)=>
             if(!@enabled)
                 return
             @start = @canvas.relMouseCoords(event)
-            @draw = true)
-        $('#'+ canvasid).mousemove((event)=>
+            @draw = true
+        @canvas.onmousemove =(event)=>
             if(@draw and @enabled)
                 @end = @canvas.relMouseCoords(event)
                 
-        )
-        $('#'+ canvasid).mouseup((event)=>
+        @canvas.onmouseup = (event)=>
             if(!@enabled)
                 return
             @end = @canvas.relMouseCoords(event)
@@ -39,7 +40,6 @@ class BoxOverlay
             if(@onBox)
                 @onBox({start: @start, end:@end})
             @draw = false
-        )
     display:(bound)->
         if @draw
             @ctx.clearRect(0,0, @canvas.width, @canvas.height);
