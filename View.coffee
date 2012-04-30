@@ -2,6 +2,7 @@ class View
 	@BOX = 1
 	@PAN = 2
 	constructor: (canvas3dctx, canvas2dctx)->		
+		@handlers = {'translate': null}
 		@span = {'RAMin':0 , 'RAMax':.256, 'DecMin':-.256, 'DecMax':.256 }
 		@requestBounds = {'RAMin':0 , 'RAMax':0, 'DecMin':0, 'DecMax':0 }
 		@sdss = null
@@ -42,6 +43,7 @@ class View
 	    if(@camera.y + y > -90 and @camera.y + y < 90)
 	      @camera.y += y
 	    @camera.z += z
+	    @notify('translate')
 	display:()->
 		@gl.viewport(0, 0, @gl.width, @gl.height);
 		@gl.clear(@gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT); # clear color and depth
@@ -104,3 +106,15 @@ class View
 			@translate(0,0,-.3)
 		else if(delta <= 0)
 			@translate(0,0,.3)
+	register:(type, callback)=>
+		oldLoaded = @handlers[type]
+		if(@handlers[type])
+			@handlers[type] = (view)->
+				if(oldLoaded)
+					oldLoaded(view)
+				callback(view)
+		else
+			@handlers[type] = callback
+	notify:(type)=>
+		if(@handlers[type])
+			@handlers[type](this);
