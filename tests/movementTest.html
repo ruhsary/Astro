@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html >
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Movement Test</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var ctx = $("canvas").get(0).getContext("2d");
+	ctx.fillStyle = "rgba(255,0,0,1)"
+	img = new Image();
+	img.onload = function(){
+		ctx.save();
+		ctx.translate(100,100);
+		ctx.scale(10,10);
+		ctx.drawImage(img, 0, 0,100,100);
+		ctx.restore();
+		ctx.fillRect(0,0,100,100)
+	}
+	img.src = "00000+00000E.fits.jpg";
+})
+</script>
+</head>
+<body>
+<canvas width="512" height="512" style="border:1px solid black;">Hello </canvas>
+
+</body>
+
+</html>
