@@ -68,10 +68,12 @@ Overlay = (function() {
 
   function Overlay(options, placeholder) {
     this.request = __bind(this.request, this);
+    this.alpha = 1.0;
     this.buffer = {};
     this.placeholder = placeholder;
     this.type = options.type != null ? options.type : "SDSS";
     this.view = options.view != null ? options.view : null;
+    this.alpha = options.alpha != null ? options.alpha : 1.0;
     if (this.type === "SDSS") {
       this.requestImage = this.requestSDSS;
     } else {
@@ -80,12 +82,14 @@ Overlay = (function() {
     if (this.view) this.view.attach(this);
   }
 
-  Overlay.prototype.notify = function(type, info) {
+  Overlay.prototype.update = function(type, info) {
     switch (type) {
       case "display":
         return this.display(info);
       case "request":
         return this.request(info);
+      case "static":
+        break;
       default:
         break;
     }
@@ -113,7 +117,7 @@ Overlay = (function() {
               return imgProxy = arguments[0];
             };
           })(),
-          lineno: 36
+          lineno: 40
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -125,13 +129,46 @@ Overlay = (function() {
   Overlay.prototype.display = function(info) {
     if (this.buffer[info.x] && this.buffer[info.x][info.y]) {
       info.ctx.save();
-      info.ctx.translate(info.x * 1024, info.y * 1024);
+      info.ctx.translate(info.x * 1024.5, info.y * 1024.5);
       info.ctx.drawImage(this.buffer[info.x][info.y].display(), 0, 0);
       return info.ctx.restore();
     }
   };
 
-  Overlay.prototype.requestSDSS = function(degX, degY) {};
+  Overlay.prototype.requestSDSS = function(degX, degY, cb) {
+    var data, decMax, decMin, imgProxy, raMax, raMin, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+      _this = this;
+    __iced_k = __iced_k_noop;
+    ___iced_passed_deferral = iced.findDeferral(arguments);
+    decMin = degY - .256;
+    decMax = degY + .256;
+    raMax = degX - .256;
+    raMin = degX + .256;
+    (function(__iced_k) {
+      __iced_deferrals = new iced.Deferrals(__iced_k, {
+        parent: ___iced_passed_deferral,
+        filename: "/home/sean/site/Astro/tests/Overlay.iced",
+        funcname: "Overlay.requestSDSS"
+      });
+      $.post("request.php", {
+        RAMin: raMin,
+        RAMax: raMax,
+        DecMin: decMin,
+        DecMax: decMax
+      }, __iced_deferrals.defer({
+        assign_fn: (function() {
+          return function() {
+            return data = arguments[0];
+          };
+        })(),
+        lineno: 57
+      }), 'text');
+      __iced_deferrals._fulfill();
+    })(function() {
+      imgProxy = new ImageProxy(data, _this.placeholder);
+      return cb(imgProxy);
+    });
+  };
 
   Overlay.prototype.requestFIRST = function(degX, degY, cb) {
     var data, decMax, decMin, imgProxy, raMax, raMin, ___iced_passed_deferral, __iced_deferrals, __iced_k,
@@ -148,13 +185,18 @@ Overlay = (function() {
         filename: "/home/sean/site/Astro/tests/Overlay.iced",
         funcname: "Overlay.requestFIRST"
       });
-      $.post("request.php", __iced_deferrals.defer({
+      $.post("request.php", {
+        RAMin: raMin,
+        RAMax: raMax,
+        DecMin: decMin,
+        DecMax: decMax
+      }, __iced_deferrals.defer({
         assign_fn: (function() {
           return function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 54
+        lineno: 65
       }), 'text');
       __iced_deferrals._fulfill();
     })(function() {
