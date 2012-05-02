@@ -147,8 +147,8 @@ Overlay = (function() {
     var decMax, decMin, imgProxy, newurl, raMax, raMin;
     decMin = degY - .256;
     decMax = degY + .256;
-    raMax = degX - .256;
-    raMin = degX + .256;
+    raMax = degX + .256;
+    raMin = degX - .256;
     newurl = "http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=" + 1.8 + "&ra=" + degX + "&dec=" + degY + "&width=1024&height=1024";
     imgProxy = new ImageProxy(newurl, this.placeholder);
     cb(imgProxy);
@@ -162,8 +162,8 @@ Overlay = (function() {
     ___iced_passed_deferral = iced.findDeferral(arguments);
     decMin = degY - .256;
     decMax = degY + .256;
-    raMax = degX - .256;
-    raMin = degX + .256;
+    raMax = degX + .256;
+    raMin = degX - .256;
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -186,7 +186,7 @@ Overlay = (function() {
       __iced_deferrals._fulfill();
     })(function() {
       if (data[0]) {
-        imgProxy = new ImageProxy('images/' + data[0], _this.placeholder);
+        imgProxy = new ImageProxy('../../images/' + data[0], _this.placeholder);
       } else {
         imgProxy = new ImageProxy(_this.placeholder, _this.placeholder);
       }
