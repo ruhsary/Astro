@@ -56,16 +56,22 @@ class Overlay
 		decMax = degY + .256
 		raMax = degX - .256 #It is minus because right ascension goes right to left
 		raMin = degX + .256
-		await $.post "request.php",{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'text'
-		imgProxy = new ImageProxy(data, @placeholder)
+		newurl ="http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024"
+		newurl = "SDSS.jpg"
+		imgProxy = new ImageProxy(newurl, @placeholder)
 		cb imgProxy
+		@view.display();
 	requestFIRST: (degX,degY, cb)->
 		decMin = degY - .256;
 		decMax = degY + .256
 		raMax = degX - .256 #It is minus because right ascension goes right to left
 		raMin = degX + .256
-		await $.post "request.php",{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'text'
-		imgProxy = new ImageProxy(data, @placeholder)
+		await $.post "request.php",{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'json'
+		if(data[0])
+			imgProxy = new ImageProxy(data[0], @placeholder)
+		else
+			imgProxy = new ImageProxy(@placeholder, @placeholder)
 		cb imgProxy
+		@view.display() #refresh
 	setAlpha:(newAlpha)=>
 		@alpha = newAlpha

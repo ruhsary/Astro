@@ -22,6 +22,9 @@ View = (function() {
     this.display = __bind(this.display, this);
 
     this.translate = __bind(this.translate, this);
+
+    var click,
+      _this = this;
     this.handlers = {
       'translate': null
     };
@@ -37,6 +40,7 @@ View = (function() {
     this.map = {};
     this.mouseHandler(this.canvas);
     this.ctx = this.canvas.getContext('2d');
+    this.ctx.globalCompositeOperation = "lighter";
     container.appendChild(this.canvas);
     this.observers = [];
     this.position = {
@@ -55,6 +59,12 @@ View = (function() {
       highY: 0
     };
     this.register('translate', this.imageRequestManager);
+    this.imageRequestManager();
+    click = function() {
+      _this.display();
+      return setTimeout(click, 1000);
+    };
+    click();
   }
 
   /*
@@ -82,31 +92,31 @@ View = (function() {
   View.prototype.display = function() {
     var i, j, overlay, _i, _len, _ref;
     this.ctx.save();
-    this.ctx.clearRect(0, 0, 512, 512);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.position.x / .512 * 1024, -this.position.y / .512 * 1024);
-    _ref = this.observers;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      overlay = _ref[_i];
-      i = this.range.lowX;
-      while (i <= this.range.highX) {
-        j = this.range.lowY;
-        while (j < this.range.highY) {
+    i = this.range.lowX;
+    while (i <= this.range.highX) {
+      j = this.range.lowY;
+      while (j < this.range.highY) {
+        _ref = this.observers;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          overlay = _ref[_i];
           overlay.update("display", {
             x: i,
             y: j,
             ctx: this.ctx
           });
-          j++;
         }
-        i++;
+        j++;
       }
+      i++;
     }
     return this.ctx.restore();
   };
 
   View.prototype.attach = function(observer) {
     this.observers.push(observer);
-    return this.imageRequestManager();
+    return this.updateState(observer);
   };
 
   View.prototype.register = function(type, callback) {
@@ -171,6 +181,25 @@ View = (function() {
       i++;
     }
     return this.display();
+  };
+
+  View.prototype.updateState = function(observer) {
+    var i, j, _results;
+    _results = [];
+    for (i in this.map) {
+      _results.push((function() {
+        var _results1;
+        _results1 = [];
+        for (j in this.map[i]) {
+          _results1.push(observer.update('request', {
+            x: i,
+            y: j
+          }));
+        }
+        return _results1;
+      }).call(this));
+    }
+    return _results;
   };
 
   View.prototype.mouseHandler = function(canvas) {

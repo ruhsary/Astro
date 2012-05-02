@@ -10,6 +10,7 @@ class View
 		@map = {};
 		@mouseHandler(@canvas)
 		@ctx = @canvas.getContext('2d')
+		@ctx.globalCompositeOperation = "lighter";
 		container.appendChild(@canvas)
 		@observers = []
 		@position =  {x:0.0, y:0.0} #Position in degree plane
@@ -17,6 +18,11 @@ class View
 		@scale = 1.8
 		@range = {lowX: 0, lowY:0, highX: 0, highY:0};
 		@register('translate', @imageRequestManager)
+		@imageRequestManager()
+		click = ()=>
+			@display();
+			setTimeout(click, 1000);
+		click();
 	###
 	translate
 	Translates X degrees, Y Degrees.
@@ -35,20 +41,20 @@ class View
 	###
 	display:()=>
 		@ctx.save()
-		@ctx.clearRect(0,0,512,512);
+		@ctx.clearRect(0,0,@canvas.width,@canvas.height);
 		@ctx.translate(@position.x / .512*1024, -@position.y / .512*1024)
-		for overlay in @observers
-			i = @range.lowX
-			while(i <= @range.highX)
-				j = @range.lowY
-				while(j < @range.highY)
+		i = @range.lowX
+		while(i <= @range.highX)
+			j = @range.lowY
+			while(j < @range.highY)
+				for overlay in @observers
 					overlay.update("display", {x:i,y:j, ctx:@ctx})			
-					j++
-				i++
+				j++
+			i++
 		@ctx.restore();
 	attach:(observer)->
 		@observers.push(observer)
-		@imageRequestManager()
+		@updateState(observer)
 	register:(type, callback)=>
 		oldLoaded = @handlers[type]
 		if(@handlers[type])
@@ -95,6 +101,10 @@ class View
 				j++
 			i++
 		@display()
+	updateState:(observer)->
+		for i of @map
+			for j of @map[i]
+				observer.update('request', {x:i, y:j})
 	mouseHandler:(canvas)->
 		$(canvas).mousedown(@panDown)
 		$(canvas).mouseup(@panUp)

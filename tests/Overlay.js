@@ -142,38 +142,16 @@ Overlay = (function() {
   };
 
   Overlay.prototype.requestSDSS = function(degX, degY, cb) {
-    var data, decMax, decMin, imgProxy, raMax, raMin, ___iced_passed_deferral, __iced_deferrals, __iced_k,
-      _this = this;
-    __iced_k = __iced_k_noop;
-    ___iced_passed_deferral = iced.findDeferral(arguments);
+    var decMax, decMin, imgProxy, newurl, raMax, raMin;
     decMin = degY - .256;
     decMax = degY + .256;
     raMax = degX - .256;
     raMin = degX + .256;
-    (function(__iced_k) {
-      __iced_deferrals = new iced.Deferrals(__iced_k, {
-        parent: ___iced_passed_deferral,
-        filename: "/home/sean/site/Astro/tests/Overlay.iced",
-        funcname: "Overlay.requestSDSS"
-      });
-      $.post("request.php", {
-        RAMin: raMin,
-        RAMax: raMax,
-        DecMin: decMin,
-        DecMax: decMax
-      }, __iced_deferrals.defer({
-        assign_fn: (function() {
-          return function() {
-            return data = arguments[0];
-          };
-        })(),
-        lineno: 58
-      }), 'text');
-      __iced_deferrals._fulfill();
-    })(function() {
-      imgProxy = new ImageProxy(data, _this.placeholder);
-      return cb(imgProxy);
-    });
+    newurl = "http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=" + 1.8 + "&ra=" + degX + "&dec=" + degY + "&width=1024&height=1024";
+    newurl = "SDSS.jpg";
+    imgProxy = new ImageProxy(newurl, this.placeholder);
+    cb(imgProxy);
+    return this.view.display();
   };
 
   Overlay.prototype.requestFIRST = function(degX, degY, cb) {
@@ -202,12 +180,13 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 66
-      }), 'text');
+        lineno: 68
+      }), 'json');
       __iced_deferrals._fulfill();
     })(function() {
-      imgProxy = new ImageProxy(data, _this.placeholder);
-      return cb(imgProxy);
+      imgProxy = new ImageProxy(data[0], _this.placeholder);
+      cb(imgProxy);
+      return _this.view.display();
     });
   };
 

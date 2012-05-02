@@ -9,10 +9,16 @@
 <script type="text/javascript">
 $(document).ready(function(){
 	var view = new View(document.getElementById("container"));
+		var SDSSOverlay = new Overlay({
+		view:view,
+		alpha:1.0
+	})
 	var FIRSTOverlay = new Overlay({
 		type:"FIRST",
-		view:view
+		view:view,
+		alpha:1.0
 	})
+
 })
 
 </script>
