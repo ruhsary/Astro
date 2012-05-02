@@ -33,3 +33,18 @@ placeholder -- defaults to undefined. This is the image that will display while 
 If you need to change the Alpha / placeholder after instantiating, you can use the setter methods:
 setAlpha(newAlpha)
 setPlaceholder(newPlaceholder)
+
+
+-----------------------------------------------------------------------------------
+Register an Event handler:
+
+To register an event handler on a view, you need the handler type and view to attach to.
+Currently there is only 1 handler: "translate", but future handlers for 'alpha', 'box', and 'point' will be added shortly.
+
+attaching a handler requires a callback function that will be called when the event is triggered, like so:
+view.register('translate', function(data){
+	alert("X:" + data.x)
+	alert("Y:" + data.y)
+})
+
+Now, whenever a translate event occurs, there will be 2 alerts displaying the new x and y.
