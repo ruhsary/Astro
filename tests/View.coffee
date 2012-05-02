@@ -6,7 +6,7 @@ class View
 		@canvas = document.createElement("canvas")
 		@canvas.width = container.clientWidth
 		@canvas.height = container.clientHeight;
-		@canvas.style.backgroundColor = "rgb(0,255,0)";
+		@canvas.style.backgroundColor = "rgb(0,0,0)";
 		@map = {};
 		@mouseHandler(@canvas)
 		@ctx = @canvas.getContext('2d')
@@ -94,6 +94,7 @@ class View
 						@map[i][j] = true 
 				j++
 			i++
+		@display()
 	mouseHandler:(canvas)->
 		$(canvas).mousedown(@panDown)
 		$(canvas).mouseup(@panUp)

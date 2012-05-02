@@ -47,7 +47,8 @@ class Overlay
 			info.ctx.save()
 			info.ctx.globalAlpha = @alpha
 			info.ctx.translate(-info.x*1024, info.y*1024);
-			info.ctx.drawImage(@buffer[info.x][info.y].display(), 0, 0)
+			if(@buffer[info.x][info.y].display())
+				info.ctx.drawImage(@buffer[info.x][info.y].display(), 0, 0)
 			info.ctx.restore()
 	requestSDSS:(degX, degY, cb)->
 		# TODO: Take requests from SDSS image database, add to imageproxy of some sort

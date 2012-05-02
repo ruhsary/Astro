@@ -134,7 +134,9 @@ Overlay = (function() {
       info.ctx.save();
       info.ctx.globalAlpha = this.alpha;
       info.ctx.translate(-info.x * 1024, info.y * 1024);
-      info.ctx.drawImage(this.buffer[info.x][info.y].display(), 0, 0);
+      if (this.buffer[info.x][info.y].display()) {
+        info.ctx.drawImage(this.buffer[info.x][info.y].display(), 0, 0);
+      }
       return info.ctx.restore();
     }
   };
@@ -165,7 +167,7 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 57
+        lineno: 58
       }), 'text');
       __iced_deferrals._fulfill();
     })(function() {
@@ -200,7 +202,7 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 65
+        lineno: 66
       }), 'text');
       __iced_deferrals._fulfill();
     })(function() {

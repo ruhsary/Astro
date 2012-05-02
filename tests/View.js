@@ -33,7 +33,7 @@ View = (function() {
     this.canvas = document.createElement("canvas");
     this.canvas.width = container.clientWidth;
     this.canvas.height = container.clientHeight;
-    this.canvas.style.backgroundColor = "rgb(0,255,0)";
+    this.canvas.style.backgroundColor = "rgb(0,0,0)";
     this.map = {};
     this.mouseHandler(this.canvas);
     this.ctx = this.canvas.getContext('2d');
@@ -134,7 +134,7 @@ View = (function() {
 
 
   View.prototype.imageRequestManager = function() {
-    var i, j, overlay, rangeX, rangeY, _i, _len, _ref, _results;
+    var i, j, overlay, rangeX, rangeY, _i, _len, _ref;
     rangeX = this.canvas.width * this.scale / 3600.0 * 2;
     rangeY = this.canvas.height * this.scale / 3600.0 * 2;
     this.range.highX = Math.ceil((this.position.x + rangeX) / .512);
@@ -144,7 +144,6 @@ View = (function() {
     console.log("rangeX: " + rangeX + "  X-range:{" + this.range.lowX + "-" + this.range.highX + "} Y-range:{" + this.range.lowY + "-" + this.range.highY + "} Position: (" + this.position.x + ", " + this.position.y + ")");
     if (this.range.lowX < 0) this.range.lowX = 0;
     i = this.range.lowX;
-    _results = [];
     while (i <= this.range.highX) {
       j = this.range.lowY;
       while (j <= this.range.highY) {
@@ -169,9 +168,9 @@ View = (function() {
         }
         j++;
       }
-      _results.push(i++);
+      i++;
     }
-    return _results;
+    return this.display();
   };
 
   View.prototype.mouseHandler = function(canvas) {
