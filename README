@@ -23,7 +23,7 @@ $(document).ready(function(){
 })
 
 Some other things to note, is the way to create overlays.
-All overlays are created view an options object.
+All overlays are created through an options object.
 An options object needs only a view to attach onto to become active. Other options:
 
 alpha  -- default alpha value will go to 1.
