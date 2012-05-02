@@ -3,16 +3,15 @@ $(document).ready ()->
 	await
 		placeholder.onload = defer()
 		placeholder.src = "placeholder.jpg"
-
-	overlay = new Overlay({type:"FIRST"}, placeholder)
-	overlay.request {x:0,y:0}
-	ctx = $("canvas").get(0).getContext("2d")
-	info = {
-		x:0,
-		y:0,
-		'ctx':ctx
-	}
+	di = document.getElementById("container");
+	view = new View(di);
+	overlayFIRST = new Overlay({
+		type: "FIRST",
+		alpha: .8,
+		"view": view
+		placeholder:placeholder
+		})
 	click = ()->
-		overlay.notify("display", info)
-		setTimeout click, 15
-	click();
+		view.display()
+		setTimeout(click, 15)
+	click()

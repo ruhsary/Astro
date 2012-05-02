@@ -9,10 +9,9 @@ class ImageProxy
 		return @currentImage
 
 class Overlay
-	constructor: (options, placeholder)->
-		@alpha = 1.0
+	constructor: (options)->
 		@buffer= {};
-		@placeholder = placeholder;
+		@placeholder = options.placeholder;
 		@type = if options.type? then options.type else "SDSS"
 		@view = if options.view? then options.view else null
 		@alpha = if options.alpha? then options.alpha else 1.0
@@ -34,19 +33,20 @@ class Overlay
 				break;
 	request:(req)=>
 		[x,y] = [req.x*.512, req.y*.512]
-		if(@buffer[x]? and @buffer[x][y]?)
+		if(@buffer[req.x]? and @buffer[req.x][req.y]?)
 			return;
 		else
 			await @requestImage x, y, defer imgProxy
-			if(@buffer[x]?)
-				@buffer[x][y] = imgProxy
+			if(@buffer[req.x]?)
+				@buffer[req.x][req.y] = imgProxy
 			else
-				@buffer[x] = {}
-				@buffer[x][y] = imgProxy
-	display:(info)->
+				@buffer[req.x] = {}
+				@buffer[req.x][req.y] = imgProxy
+	display:(info)=>
 		if(@buffer[info.x] and @buffer[info.x][info.y])
 			info.ctx.save()
-			info.ctx.translate(info.x*1024.5, info.y*1024.5);
+			info.ctx.globalAlpha = @alpha
+			info.ctx.translate(-info.x*1024, info.y*1024);
 			info.ctx.drawImage(@buffer[info.x][info.y].display(), 0, 0)
 			info.ctx.restore()
 	requestSDSS:(degX, degY, cb)->
@@ -63,6 +63,8 @@ class Overlay
 		decMax = degY + .256
 		raMax = degX - .256 #It is minus because right ascension goes right to left
 		raMin = degX + .256
-		await $.post "request.php", {RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'text'
-		imgProxy = new ImageProxy("00000+00000E.fits.jpg", @placeholder)
+		await $.post "request.php",{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'text'
+		imgProxy = new ImageProxy(data, @placeholder)
 		cb imgProxy
+	setAlpha:(newAlpha)=>
+		@alpha = newAlpha

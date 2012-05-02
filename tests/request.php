@@ -1,1 +1,1 @@
-<?php echo "FUCK YOU"; ?>
+<?php echo "00000+00000E.fits.jpg"; ?>

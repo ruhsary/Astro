@@ -66,11 +66,14 @@ Overlay = (function() {
 
   Overlay.name = 'Overlay';
 
-  function Overlay(options, placeholder) {
+  function Overlay(options) {
+    this.setAlpha = __bind(this.setAlpha, this);
+
+    this.display = __bind(this.display, this);
+
     this.request = __bind(this.request, this);
-    this.alpha = 1.0;
     this.buffer = {};
-    this.placeholder = placeholder;
+    this.placeholder = options.placeholder;
     this.type = options.type != null ? options.type : "SDSS";
     this.view = options.view != null ? options.view : null;
     this.alpha = options.alpha != null ? options.alpha : 1.0;
@@ -101,7 +104,7 @@ Overlay = (function() {
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
     _ref = [req.x * .512, req.y * .512], x = _ref[0], y = _ref[1];
-    if ((this.buffer[x] != null) && (this.buffer[x][y] != null)) {
+    if ((this.buffer[req.x] != null) && (this.buffer[req.x][req.y] != null)) {
       return;
       return __iced_k();
     } else {
@@ -117,11 +120,11 @@ Overlay = (function() {
               return imgProxy = arguments[0];
             };
           })(),
-          lineno: 40
+          lineno: 39
         }));
         __iced_deferrals._fulfill();
       })(function() {
-        return __iced_k((_this.buffer[x] != null) ? _this.buffer[x][y] = imgProxy : (_this.buffer[x] = {}, _this.buffer[x][y] = imgProxy));
+        return __iced_k((_this.buffer[req.x] != null) ? _this.buffer[req.x][req.y] = imgProxy : (_this.buffer[req.x] = {}, _this.buffer[req.x][req.y] = imgProxy));
       });
     }
   };
@@ -129,7 +132,8 @@ Overlay = (function() {
   Overlay.prototype.display = function(info) {
     if (this.buffer[info.x] && this.buffer[info.x][info.y]) {
       info.ctx.save();
-      info.ctx.translate(info.x * 1024.5, info.y * 1024.5);
+      info.ctx.globalAlpha = this.alpha;
+      info.ctx.translate(-info.x * 1024, info.y * 1024);
       info.ctx.drawImage(this.buffer[info.x][info.y].display(), 0, 0);
       return info.ctx.restore();
     }
@@ -200,9 +204,13 @@ Overlay = (function() {
       }), 'text');
       __iced_deferrals._fulfill();
     })(function() {
-      imgProxy = new ImageProxy("00000+00000E.fits.jpg", _this.placeholder);
+      imgProxy = new ImageProxy(data, _this.placeholder);
       return cb(imgProxy);
     });
+  };
+
+  Overlay.prototype.setAlpha = function(newAlpha) {
+    return this.alpha = newAlpha;
   };
 
   return Overlay;

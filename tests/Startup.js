@@ -39,7 +39,7 @@ window.iced = {
 window.__iced_k = window.__iced_k_noop = function() {};
 
 $(document).ready(function() {
-  var click, ctx, info, overlay, placeholder, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+  var click, di, overlayFIRST, placeholder, view, ___iced_passed_deferral, __iced_deferrals, __iced_k,
     _this = this;
   __iced_k = __iced_k_noop;
   ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -55,21 +55,16 @@ $(document).ready(function() {
     placeholder.src = "placeholder.jpg";
     __iced_deferrals._fulfill();
   })(function() {
-    overlay = new Overlay({
-      type: "FIRST"
-    }, placeholder);
-    overlay.request({
-      x: 0,
-      y: 0
+    di = document.getElementById("container");
+    view = new View(di);
+    overlayFIRST = new Overlay({
+      type: "FIRST",
+      alpha: .8,
+      "view": view,
+      placeholder: placeholder
     });
-    ctx = $("canvas").get(0).getContext("2d");
-    info = {
-      x: 0,
-      y: 0,
-      'ctx': ctx
-    };
     click = function() {
-      overlay.notify("display", info);
+      view.display();
       return setTimeout(click, 15);
     };
     return click();

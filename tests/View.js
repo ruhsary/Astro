@@ -7,6 +7,14 @@ View = (function() {
   View.name = 'View';
 
   function View(container) {
+    this.panUp = __bind(this.panUp, this);
+
+    this.panMove = __bind(this.panMove, this);
+
+    this.panDown = __bind(this.panDown, this);
+
+    this.imageRequestManager = __bind(this.imageRequestManager, this);
+
     this.notify = __bind(this.notify, this);
 
     this.register = __bind(this.register, this);
@@ -17,31 +25,88 @@ View = (function() {
     this.handlers = {
       'translate': null
     };
+    this.mouseState = 0;
+    this.mouseCoords = {
+      x: 0,
+      y: 0
+    };
     this.canvas = document.createElement("canvas");
-    this.canvas.width = container.width;
-    this.canvas.height = container.height;
-    this.ctx = canvas.getContext('2d');
-    contrainer.appendChild(this.canvas);
+    this.canvas.width = container.clientWidth;
+    this.canvas.height = container.clientHeight;
+    this.canvas.style.backgroundColor = "rgb(0,255,0)";
+    this.map = {};
+    this.mouseHandler(this.canvas);
+    this.ctx = this.canvas.getContext('2d');
+    container.appendChild(this.canvas);
     this.observers = [];
-    this.position({
+    this.position = {
       x: 0.0,
       y: 0.0
-    });
-    this.scale = 1.0;
+    };
+    this.pixelTranslation = {
+      x: this.canvas.width / 2,
+      y: this.canvas.height / 2
+    };
+    this.scale = 1.8;
+    this.range = {
+      lowX: 0,
+      lowY: 0,
+      highX: 0,
+      highY: 0
+    };
+    this.register('translate', this.imageRequestManager);
   }
+
+  /*
+  	translate
+  	Translates X degrees, Y Degrees.
+  	Not pixels! Degrees! Going translate(0,1) is a full degree, which is 2 images.
+  	
+  	Triggers: 'translate' event
+  */
+
 
   View.prototype.translate = function(x, y) {
     this.position.x += x;
-    return this.position.y += y;
+    this.position.y += y;
+    return this.notify('translate', this.position);
   };
 
+  /*
+  	display:
+  		will send requests to all obvservers asking them to draw their
+  		images if they have any.
+  */
+
+
   View.prototype.display = function() {
+    var i, j, overlay, _i, _len, _ref;
     this.ctx.save();
-    return this.ctx.translate(x);
+    this.ctx.clearRect(0, 0, 512, 512);
+    this.ctx.translate(this.position.x / .512 * 1024, -this.position.y / .512 * 1024);
+    _ref = this.observers;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      overlay = _ref[_i];
+      i = this.range.lowX;
+      while (i <= this.range.highX) {
+        j = this.range.lowY;
+        while (j < this.range.highY) {
+          overlay.update("display", {
+            x: i,
+            y: j,
+            ctx: this.ctx
+          });
+          j++;
+        }
+        i++;
+      }
+    }
+    return this.ctx.restore();
   };
 
   View.prototype.attach = function(observer) {
-    return this.observers.push(observer);
+    this.observers.push(observer);
+    return this.imageRequestManager();
   };
 
   View.prototype.register = function(type, callback) {
@@ -57,8 +122,80 @@ View = (function() {
     }
   };
 
-  View.prototype.notify = function(type) {
-    if (this.handlers[type]) return this.handlers[type](this);
+  View.prototype.notify = function(type, info) {
+    if (this.handlers[type]) return this.handlers[type](info);
+  };
+
+  /*
+  	Function: imageRequestManager
+  	Use: Private function to manage translation and requesting images.
+  	Hooked on construction to the translate event handler
+  */
+
+
+  View.prototype.imageRequestManager = function() {
+    var i, j, overlay, rangeX, rangeY, _i, _len, _ref, _results;
+    rangeX = this.canvas.width * this.scale / 3600.0 * 2;
+    rangeY = this.canvas.height * this.scale / 3600.0 * 2;
+    this.range.highX = Math.ceil((this.position.x + rangeX) / .512);
+    this.range.lowX = Math.floor((this.position.x - rangeX) / .512);
+    this.range.highY = Math.ceil((this.position.y + rangeY) / .512);
+    this.range.lowY = Math.floor((this.position.y - rangeY) / .512);
+    console.log("rangeX: " + rangeX + "  X-range:{" + this.range.lowX + "-" + this.range.highX + "} Y-range:{" + this.range.lowY + "-" + this.range.highY + "} Position: (" + this.position.x + ", " + this.position.y + ")");
+    if (this.range.lowX < 0) this.range.lowX = 0;
+    i = this.range.lowX;
+    _results = [];
+    while (i <= this.range.highX) {
+      j = this.range.lowY;
+      while (j <= this.range.highY) {
+        if ((this.map[i] != null) && this.map[i][j]) {
+          j++;
+          continue;
+        } else {
+          _ref = this.observers;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            overlay = _ref[_i];
+            overlay.update('request', {
+              x: i,
+              y: j
+            });
+          }
+          if (this.map[i] != null) {
+            this.map[i][j] = true;
+          } else {
+            this.map[i] = {};
+            this.map[i][j] = true;
+          }
+        }
+        j++;
+      }
+      _results.push(i++);
+    }
+    return _results;
+  };
+
+  View.prototype.mouseHandler = function(canvas) {
+    $(canvas).mousedown(this.panDown);
+    $(canvas).mouseup(this.panUp);
+    return $(canvas).mousemove(this.panMove);
+  };
+
+  View.prototype.panDown = function(event) {
+    this.mouseState = 1;
+    this.mouseCoords.x = event.clientX;
+    return this.mouseCoords.y = event.clientY;
+  };
+
+  View.prototype.panMove = function(event) {
+    if (this.mouseState === 1) {
+      this.translate((event.clientX - this.mouseCoords.x) / 1000, (-event.clientY + this.mouseCoords.y) / 1000);
+      this.mouseCoords.x = event.clientX;
+      return this.mouseCoords.y = event.clientY;
+    }
+  };
+
+  View.prototype.panUp = function(event) {
+    return this.mouseState = 0;
   };
 
   return View;
