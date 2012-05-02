@@ -75,3 +75,5 @@ class Overlay
 		@view.display() #refresh
 	setAlpha:(newAlpha)=>
 		@alpha = newAlpha
+	setPlaceholder: (newPlaceholder)=>
+		@placeholder = newPlaceholder

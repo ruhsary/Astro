@@ -67,6 +67,8 @@ Overlay = (function() {
   Overlay.name = 'Overlay';
 
   function Overlay(options) {
+    this.setPlaceholder = __bind(this.setPlaceholder, this);
+
     this.setAlpha = __bind(this.setAlpha, this);
 
     this.display = __bind(this.display, this);
@@ -184,7 +186,11 @@ Overlay = (function() {
       }), 'json');
       __iced_deferrals._fulfill();
     })(function() {
-      imgProxy = new ImageProxy(data[0], _this.placeholder);
+      if (data[0]) {
+        imgProxy = new ImageProxy(data[0], _this.placeholder);
+      } else {
+        imgProxy = new ImageProxy(_this.placeholder, _this.placeholder);
+      }
       cb(imgProxy);
       return _this.view.display();
     });
@@ -192,6 +198,10 @@ Overlay = (function() {
 
   Overlay.prototype.setAlpha = function(newAlpha) {
     return this.alpha = newAlpha;
+  };
+
+  Overlay.prototype.setPlaceholder = function(newPlaceholder) {
+    return this.placeholder = newPlaceholder;
   };
 
   return Overlay;
