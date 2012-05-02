@@ -80,8 +80,6 @@ class View
 		@range.lowX = Math.floor((@position.x - rangeX)/.512)
 		@range.highY = Math.ceil((@position.y + rangeY)/.512)
 		@range.lowY = Math.floor((@position.y - rangeY)/.512)
-		console.log("rangeX: #{rangeX}  X-range:{#{@range.lowX}-#{@range.highX}} Y-range:{#{@range.lowY}-#{@range.highY}} Position: (#{@position.x}, #{@position.y})")
-
 		if @range.lowX < 0 then @range.lowX = 0
 		i = @range.lowX
 		while(i <= @range.highX)

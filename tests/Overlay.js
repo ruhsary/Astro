@@ -150,7 +150,6 @@ Overlay = (function() {
     raMax = degX - .256;
     raMin = degX + .256;
     newurl = "http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=" + 1.8 + "&ra=" + degX + "&dec=" + degY + "&width=1024&height=1024";
-    newurl = "SDSS.jpg";
     imgProxy = new ImageProxy(newurl, this.placeholder);
     cb(imgProxy);
     return this.view.display();
@@ -171,7 +170,7 @@ Overlay = (function() {
         filename: "/home/sean/site/Astro/tests/Overlay.iced",
         funcname: "Overlay.requestFIRST"
       });
-      $.post("request.php", {
+      $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', {
         RAMin: raMin,
         RAMax: raMax,
         DecMin: decMin,
@@ -187,7 +186,7 @@ Overlay = (function() {
       __iced_deferrals._fulfill();
     })(function() {
       if (data[0]) {
-        imgProxy = new ImageProxy(data[0], _this.placeholder);
+        imgProxy = new ImageProxy('images/' + data[0], _this.placeholder);
       } else {
         imgProxy = new ImageProxy(_this.placeholder, _this.placeholder);
       }

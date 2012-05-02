@@ -11,7 +11,7 @@ To create a view, all you need is a container like a div tag. In the example bel
 
 $(document).ready(function(){
 	var view = new View(document.getElementById("container"));
-		var SDSSOverlay = new Overlay({
+	var SDSSOverlay = new Overlay({
 		view:view
 	})
 	var FIRSTOverlay = new Overlay({

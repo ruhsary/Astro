@@ -151,7 +151,6 @@ View = (function() {
     this.range.lowX = Math.floor((this.position.x - rangeX) / .512);
     this.range.highY = Math.ceil((this.position.y + rangeY) / .512);
     this.range.lowY = Math.floor((this.position.y - rangeY) / .512);
-    console.log("rangeX: " + rangeX + "  X-range:{" + this.range.lowX + "-" + this.range.highX + "} Y-range:{" + this.range.lowY + "-" + this.range.highY + "} Position: (" + this.position.x + ", " + this.position.y + ")");
     if (this.range.lowX < 0) this.range.lowX = 0;
     i = this.range.lowX;
     while (i <= this.range.highX) {
