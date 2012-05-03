@@ -20,7 +20,7 @@ class Overlay
 			@requestImage = @requestSDSS 
 		else if @type == "FIRST"
 			@requestImage = @requestFIRST
-			@imagePath = if options.imagepath? then options.imagepath else '../../images/'
+			@imagePath = if options.imagepath? then options.imagepath else ''
 		if(@view)
 			@view.attach(this); #Creating view requires an attach to observer
 	update:(type, info)->
@@ -49,6 +49,7 @@ class Overlay
 			info.ctx.save()
 			info.ctx.globalAlpha = @alpha
 			info.ctx.translate(-info.x*1024, info.y*1024);
+			
 			if(@buffer[info.x][info.y].display())
 				info.ctx.drawImage(@buffer[info.x][info.y].display(), 0, 0)
 			info.ctx.restore()
@@ -58,8 +59,8 @@ class Overlay
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-		newurl ="http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024"
-		#newurl = "SDSS.jpg"
+		#newurl ="http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024"
+		newurl = "SDSS.jpg"
 		imgProxy = new ImageProxy(newurl, @placeholder)
 		cb imgProxy
 		@view.display();
@@ -68,9 +69,11 @@ class Overlay
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-		await $.get 'http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php',{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'json'
+		#await $.get 'http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php',{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'json'
+		await $.get 'request.php',{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'json'
+		
 		if(data[0])
-			imgProxy = new ImageProxy((@imagepath + data[0]), @placeholder)
+			imgProxy = new ImageProxy((@imagePath + data[0]), @placeholder)
 		else
 			imgProxy = new ImageProxy(@placeholder, @placeholder)
 		cb imgProxy

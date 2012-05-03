@@ -1,6 +1,6 @@
 class View
 	constructor:(container)->
-		@handlers = {'translate': null}
+		@handlers = {'translate': null, 'scale':null}
 		@mouseState = 0; #0 = none, 1 = down  2 = up
 		@mouseCoords = {x:0, y:0}
 		@canvas = document.createElement("canvas")
@@ -27,13 +27,32 @@ class View
 	translate
 	Translates X degrees, Y Degrees.
 	Not pixels! Degrees! Going translate(0,1) is a full degree, which is 2 images.
-	
+	Compounds each translate
 	Triggers: 'translate' event
 	###
 	translate:(x,y)=>
 		@position.x += x
 		@position.y += y
 		@notify('translate', @position)
+
+	###
+	jump
+	moves X degrees, Y Degrees.
+	Not pixels! Degrees! Going translate(0,1) is a full degree, which is 2 images.
+	doesn't compound
+	Triggers: 'translate' event
+	###
+	jump:(x,y)=>
+		@position.x = x
+		@position.y = y
+		@notify('translate', @position)
+
+	addScale:(addScale)=>
+		@scale += addScale
+		@notify('scale', @scale)
+	setScale:(newScale)=>
+		@scale = newScale
+		@notify('scale', @scale)
 	###
 	display:
 		will send requests to all obvservers asking them to draw their
@@ -42,7 +61,11 @@ class View
 	display:()=>
 		@ctx.save()
 		@ctx.clearRect(0,0,@canvas.width,@canvas.height);
-		@ctx.translate(@position.x / .512*1024, -@position.y / .512*1024)
+		@ctx.translate(@pixelTranslation.x, @pixelTranslation.y)
+		zoom = 1.8/@scale;
+		@ctx.translate(-512*zoom, -512*zoom)
+		@ctx.translate(@position.x / .512*1024*zoom, -@position.y / .512*1024*zoom)
+		@ctx.scale(zoom, zoom)
 		i = @range.lowX
 		while(i <= @range.highX)
 			j = @range.lowY
@@ -107,14 +130,41 @@ class View
 		$(canvas).mousedown(@panDown)
 		$(canvas).mouseup(@panUp)
 		$(canvas).mousemove(@panMove)
+		@hookEvent(canvas, "mousewheel", @panScroll)
 	panDown:(event)=>
 		@mouseState = 1
 		@mouseCoords.x = event.clientX
 		@mouseCoords.y = event.clientY
 	panMove: (event)=>
 		if(@mouseState == 1)
-			@translate((event.clientX-@mouseCoords.x)/1000, (-event.clientY+@mouseCoords.y)/1000)
+			@translate((event.clientX-@mouseCoords.x)/ 1000 * 1.8 / @scale, (-event.clientY+@mouseCoords.y)/ 1000 * 1.8 / @scale)
 			@mouseCoords.x = event.clientX
 			@mouseCoords.y = event.clientY
 	panUp: (event)=>
 		@mouseState = 0
+	panScroll: (event)=>
+		delta = 0;
+		if (!event) 
+			event = window.event;
+		#normalize the delta
+		if (event.wheelDelta)
+			#IE and Opera
+			delta = event.wheelDelta / 60;
+		else if (event.detail) 
+			delta = -event.detail / 2;
+		if(delta > 0 and @scale >= 1.8)
+			@addScale(-.3)
+		else if(delta <= 0)
+			@addScale(.3)
+		@imageRequestManager()
+	hookEvent:(element, eventName, callback)->
+		if(typeof(element) == "string")
+			element = document.getElementById(element);
+		if(element == null)
+			return;
+		if(element.addEventListener)
+			if(eventName == 'mousewheel')
+				element.addEventListener('DOMMouseScroll', callback, false);  
+			element.addEventListener(eventName, callback, false);
+		else if(element.attachEvent)
+			element.attachEvent("on" + eventName, callback);

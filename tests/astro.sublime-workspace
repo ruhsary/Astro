@@ -71,7 +71,7 @@
 			"file": "request.php",
 			"settings":
 			{
-				"buffer_size": 25,
+				"buffer_size": 58,
 				"line_ending": "Unix",
 				"name": "reqeust.php"
 			}
@@ -80,7 +80,7 @@
 			"file": "Startup.coffee",
 			"settings":
 			{
-				"buffer_size": 368,
+				"buffer_size": 361,
 				"line_ending": "Unix"
 			}
 		},
@@ -88,7 +88,7 @@
 			"file": "movementTest.html",
 			"settings":
 			{
-				"buffer_size": 483,
+				"buffer_size": 723,
 				"line_ending": "Unix"
 			}
 		},
@@ -96,7 +96,7 @@
 			"file": "Overlay.iced",
 			"settings":
 			{
-				"buffer_size": 2125,
+				"buffer_size": 2666,
 				"line_ending": "Unix"
 			}
 		},
@@ -104,7 +104,7 @@
 			"file": "View.coffee",
 			"settings":
 			{
-				"buffer_size": 771,
+				"buffer_size": 3485,
 				"line_ending": "Unix",
 				"name": "View.coffee"
 			}
@@ -113,7 +113,7 @@
 			"file": "/home/sean/site/Astro/View.coffee",
 			"settings":
 			{
-				"buffer_size": 4035,
+				"buffer_size": 0,
 				"line_ending": "Unix"
 			}
 		}
@@ -275,15 +275,15 @@
 					"file": "request.php",
 					"settings":
 					{
-						"buffer_size": 25,
+						"buffer_size": 58,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								25,
-								25
+								0,
+								0
 							]
 						],
 						"settings":
@@ -302,20 +302,21 @@
 					"file": "Startup.coffee",
 					"settings":
 					{
-						"buffer_size": 368,
+						"buffer_size": 361,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								359,
-								359
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/IcedCoffeeScript/Syntaxes/IcedCoffeeScript.tmLanguage"
+							"syntax": "Packages/IcedCoffeeScript/Syntaxes/IcedCoffeeScript.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -328,15 +329,15 @@
 					"file": "movementTest.html",
 					"settings":
 					{
-						"buffer_size": 483,
+						"buffer_size": 723,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								359,
-								359
+								0,
+								0
 							]
 						],
 						"settings":
@@ -355,15 +356,15 @@
 					"file": "Overlay.iced",
 					"settings":
 					{
-						"buffer_size": 2125,
+						"buffer_size": 2666,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								696,
-								696
+								0,
+								0
 							]
 						],
 						"settings":
@@ -382,21 +383,22 @@
 					"file": "View.coffee",
 					"settings":
 					{
-						"buffer_size": 771,
+						"buffer_size": 3485,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								770,
-								770
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"auto_name": "View.coffee",
-							"syntax": "Packages/IcedCoffeeScript/Syntaxes/IcedCoffeeScript.tmLanguage"
+							"syntax": "Packages/IcedCoffeeScript/Syntaxes/IcedCoffeeScript.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -409,15 +411,15 @@
 					"file": "/home/sean/site/Astro/View.coffee",
 					"settings":
 					{
-						"buffer_size": 4035,
+						"buffer_size": 0,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								78,
-								78
+								0,
+								0
 							]
 						],
 						"settings":
@@ -465,10 +467,6 @@
 		]
 	},
 	"menu_visible": true,
-	"output.exec":
-	{
-		"height": 112.0
-	},
 	"replace":
 	{
 		"height": 0.0

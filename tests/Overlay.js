@@ -84,7 +84,7 @@ Overlay = (function() {
       this.requestImage = this.requestSDSS;
     } else if (this.type === "FIRST") {
       this.requestImage = this.requestFIRST;
-      this.imagePath = options.imagepath != null ? options.imagepath : '../../images/';
+      this.imagePath = options.imagepath != null ? options.imagepath : '';
     }
     if (this.view) this.view.attach(this);
   }
@@ -115,7 +115,7 @@ Overlay = (function() {
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "/home/sean/site/Astro/tests/Overlay.iced",
+          filename: "Overlay.iced",
           funcname: "Overlay.request"
         });
         _this.requestImage(x, y, __iced_deferrals.defer({
@@ -151,7 +151,7 @@ Overlay = (function() {
     decMax = degY + .256;
     raMax = degX + .256;
     raMin = degX - .256;
-    newurl = "http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=" + 1.8 + "&ra=" + degX + "&dec=" + degY + "&width=1024&height=1024";
+    newurl = "SDSS.jpg";
     imgProxy = new ImageProxy(newurl, this.placeholder);
     cb(imgProxy);
     return this.view.display();
@@ -169,10 +169,10 @@ Overlay = (function() {
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "/home/sean/site/Astro/tests/Overlay.iced",
+        filename: "Overlay.iced",
         funcname: "Overlay.requestFIRST"
       });
-      $.get('http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php', {
+      $.get('request.php', {
         RAMin: raMin,
         RAMax: raMax,
         DecMin: decMin,
@@ -183,12 +183,12 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 70
+        lineno: 72
       }), 'json');
       __iced_deferrals._fulfill();
     })(function() {
       if (data[0]) {
-        imgProxy = new ImageProxy(_this.imagepath + data[0], _this.placeholder);
+        imgProxy = new ImageProxy(_this.imagePath + data[0], _this.placeholder);
       } else {
         imgProxy = new ImageProxy(_this.placeholder, _this.placeholder);
       }

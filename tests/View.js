@@ -7,6 +7,8 @@ View = (function() {
   View.name = 'View';
 
   function View(container) {
+    this.panScroll = __bind(this.panScroll, this);
+
     this.panUp = __bind(this.panUp, this);
 
     this.panMove = __bind(this.panMove, this);
@@ -21,12 +23,19 @@ View = (function() {
 
     this.display = __bind(this.display, this);
 
+    this.setScale = __bind(this.setScale, this);
+
+    this.addScale = __bind(this.addScale, this);
+
+    this.jump = __bind(this.jump, this);
+
     this.translate = __bind(this.translate, this);
 
     var click,
       _this = this;
     this.handlers = {
-      'translate': null
+      'translate': null,
+      'scale': null
     };
     this.mouseState = 0;
     this.mouseCoords = {
@@ -71,7 +80,7 @@ View = (function() {
   	translate
   	Translates X degrees, Y Degrees.
   	Not pixels! Degrees! Going translate(0,1) is a full degree, which is 2 images.
-  	
+  	Compounds each translate
   	Triggers: 'translate' event
   */
 
@@ -83,6 +92,31 @@ View = (function() {
   };
 
   /*
+  	jump
+  	moves X degrees, Y Degrees.
+  	Not pixels! Degrees! Going translate(0,1) is a full degree, which is 2 images.
+  	doesn't compound
+  	Triggers: 'translate' event
+  */
+
+
+  View.prototype.jump = function(x, y) {
+    this.position.x = x;
+    this.position.y = y;
+    return this.notify('translate', this.position);
+  };
+
+  View.prototype.addScale = function(addScale) {
+    this.scale += addScale;
+    return this.notify('scale', this.scale);
+  };
+
+  View.prototype.setScale = function(newScale) {
+    this.scale = newScale;
+    return this.notify('scale', this.scale);
+  };
+
+  /*
   	display:
   		will send requests to all obvservers asking them to draw their
   		images if they have any.
@@ -90,10 +124,14 @@ View = (function() {
 
 
   View.prototype.display = function() {
-    var i, j, overlay, _i, _len, _ref;
+    var i, j, overlay, zoom, _i, _len, _ref;
     this.ctx.save();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.translate(this.position.x / .512 * 1024, -this.position.y / .512 * 1024);
+    this.ctx.translate(this.pixelTranslation.x, this.pixelTranslation.y);
+    zoom = 1.8 / this.scale;
+    this.ctx.translate(-512 * zoom, -512 * zoom);
+    this.ctx.translate(this.position.x / .512 * 1024 * zoom, -this.position.y / .512 * 1024 * zoom);
+    this.ctx.scale(zoom, zoom);
     i = this.range.lowX;
     while (i <= this.range.highX) {
       j = this.range.lowY;
@@ -204,7 +242,8 @@ View = (function() {
   View.prototype.mouseHandler = function(canvas) {
     $(canvas).mousedown(this.panDown);
     $(canvas).mouseup(this.panUp);
-    return $(canvas).mousemove(this.panMove);
+    $(canvas).mousemove(this.panMove);
+    return this.hookEvent(canvas, "mousewheel", this.panScroll);
   };
 
   View.prototype.panDown = function(event) {
@@ -215,7 +254,7 @@ View = (function() {
 
   View.prototype.panMove = function(event) {
     if (this.mouseState === 1) {
-      this.translate((event.clientX - this.mouseCoords.x) / 1000, (-event.clientY + this.mouseCoords.y) / 1000);
+      this.translate((event.clientX - this.mouseCoords.x) / 1000 * 1.8 / this.scale, (-event.clientY + this.mouseCoords.y) / 1000 * 1.8 / this.scale);
       this.mouseCoords.x = event.clientX;
       return this.mouseCoords.y = event.clientY;
     }
@@ -223,6 +262,36 @@ View = (function() {
 
   View.prototype.panUp = function(event) {
     return this.mouseState = 0;
+  };
+
+  View.prototype.panScroll = function(event) {
+    var delta;
+    delta = 0;
+    if (!event) event = window.event;
+    if (event.wheelDelta) {
+      delta = event.wheelDelta / 60;
+    } else if (event.detail) {
+      delta = -event.detail / 2;
+    }
+    if (delta > 0 && this.scale >= 1.8) {
+      this.addScale(-.3);
+    } else if (delta <= 0) {
+      this.addScale(.3);
+    }
+    return this.imageRequestManager();
+  };
+
+  View.prototype.hookEvent = function(element, eventName, callback) {
+    if (typeof element === "string") element = document.getElementById(element);
+    if (element === null) return;
+    if (element.addEventListener) {
+      if (eventName === 'mousewheel') {
+        element.addEventListener('DOMMouseScroll', callback, false);
+      }
+      return element.addEventListener(eventName, callback, false);
+    } else if (element.attachEvent) {
+      return element.attachEvent("on" + eventName, callback);
+    }
   };
 
   return View;
