@@ -79,10 +79,12 @@ Overlay = (function() {
     this.type = options.type != null ? options.type : "SDSS";
     this.view = options.view != null ? options.view : null;
     this.alpha = options.alpha != null ? options.alpha : 1.0;
+    this.imagePath = '';
     if (this.type === "SDSS") {
       this.requestImage = this.requestSDSS;
-    } else {
+    } else if (this.type === "FIRST") {
       this.requestImage = this.requestFIRST;
+      this.imagePath = options.imagepath != null ? options.imagepath : '../../images/';
     }
     if (this.view) this.view.attach(this);
   }
@@ -122,7 +124,7 @@ Overlay = (function() {
               return imgProxy = arguments[0];
             };
           })(),
-          lineno: 39
+          lineno: 41
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -181,12 +183,12 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 68
+        lineno: 70
       }), 'json');
       __iced_deferrals._fulfill();
     })(function() {
       if (data[0]) {
-        imgProxy = new ImageProxy('../../images/' + data[0], _this.placeholder);
+        imgProxy = new ImageProxy(_this.imagepath + data[0], _this.placeholder);
       } else {
         imgProxy = new ImageProxy(_this.placeholder, _this.placeholder);
       }

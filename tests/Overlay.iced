@@ -15,10 +15,12 @@ class Overlay
 		@type = if options.type? then options.type else "SDSS"
 		@view = if options.view? then options.view else null
 		@alpha = if options.alpha? then options.alpha else 1.0
+		@imagePath = ''
 		if @type == "SDSS"
 			@requestImage = @requestSDSS 
-		else
+		else if @type == "FIRST"
 			@requestImage = @requestFIRST
+			@imagePath = if options.imagepath? then options.imagepath else '../../images/'
 		if(@view)
 			@view.attach(this); #Creating view requires an attach to observer
 	update:(type, info)->
@@ -68,7 +70,7 @@ class Overlay
 		raMin = degX - .256
 		await $.get 'http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php',{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'json'
 		if(data[0])
-			imgProxy = new ImageProxy(('../../images/'+ data[0]), @placeholder)
+			imgProxy = new ImageProxy((@imagepath + data[0]), @placeholder)
 		else
 			imgProxy = new ImageProxy(@placeholder, @placeholder)
 		cb imgProxy
