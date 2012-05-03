@@ -46,13 +46,14 @@ class View
 		@position.x = x
 		@position.y = y
 		@notify('translate', @position)
-
 	addScale:(addScale)=>
 		@scale += addScale
 		@notify('scale', @scale)
+		@display()
 	setScale:(newScale)=>
 		@scale = newScale
 		@notify('scale', @scale)
+		@display()
 	###
 	display:
 		will send requests to all obvservers asking them to draw their
@@ -142,6 +143,7 @@ class View
 			@mouseCoords.y = event.clientY
 	panUp: (event)=>
 		@mouseState = 0
+		@imageRequestManager()
 	panScroll: (event)=>
 		delta = 0;
 		if (!event) 

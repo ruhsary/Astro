@@ -76,6 +76,7 @@ Overlay = (function() {
     this.request = __bind(this.request, this);
     this.buffer = {};
     this.placeholder = options.placeholder;
+    this.debug = options.type != null ? options.type : false;
     this.type = options.type != null ? options.type : "SDSS";
     this.view = options.view != null ? options.view : null;
     this.alpha = options.alpha != null ? options.alpha : 1.0;
@@ -124,7 +125,7 @@ Overlay = (function() {
               return imgProxy = arguments[0];
             };
           })(),
-          lineno: 41
+          lineno: 42
         }));
         __iced_deferrals._fulfill();
       })(function() {
@@ -151,14 +152,15 @@ Overlay = (function() {
     decMax = degY + .256;
     raMax = degX + .256;
     raMin = degX - .256;
-    newurl = "SDSS.jpg";
+    newurl = "http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=" + 1.8 + "&ra=" + degX + "&dec=" + degY + "&width=1024&height=1024";
+    if (this.debug) newurl = "SDSS.jpg";
     imgProxy = new ImageProxy(newurl, this.placeholder);
     cb(imgProxy);
     return this.view.display();
   };
 
   Overlay.prototype.requestFIRST = function(degX, degY, cb) {
-    var data, decMax, decMin, imgProxy, raMax, raMin, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+    var data, decMax, decMin, imgProxy, raMax, raMin, url, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -166,13 +168,15 @@ Overlay = (function() {
     decMax = degY + .256;
     raMax = degX + .256;
     raMin = degX - .256;
+    url = 'http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php';
+    if (this.debug) url = 'request.php';
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
         filename: "Overlay.iced",
         funcname: "Overlay.requestFIRST"
       });
-      $.get('request.php', {
+      $.get(url, {
         RAMin: raMin,
         RAMax: raMax,
         DecMin: decMin,
@@ -183,7 +187,7 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 72
+        lineno: 77
       }), 'json');
       __iced_deferrals._fulfill();
     })(function() {

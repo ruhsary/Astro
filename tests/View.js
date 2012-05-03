@@ -108,12 +108,14 @@ View = (function() {
 
   View.prototype.addScale = function(addScale) {
     this.scale += addScale;
-    return this.notify('scale', this.scale);
+    this.notify('scale', this.scale);
+    return this.display();
   };
 
   View.prototype.setScale = function(newScale) {
     this.scale = newScale;
-    return this.notify('scale', this.scale);
+    this.notify('scale', this.scale);
+    return this.display();
   };
 
   /*
@@ -261,7 +263,8 @@ View = (function() {
   };
 
   View.prototype.panUp = function(event) {
-    return this.mouseState = 0;
+    this.mouseState = 0;
+    return this.imageRequestManager();
   };
 
   View.prototype.panScroll = function(event) {
