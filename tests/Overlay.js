@@ -71,6 +71,10 @@ Overlay = (function() {
 
     this.setAlpha = __bind(this.setAlpha, this);
 
+    this.requestFIRST = __bind(this.requestFIRST, this);
+
+    this.requestSDSS = __bind(this.requestSDSS, this);
+
     this.display = __bind(this.display, this);
 
     this.request = __bind(this.request, this);
@@ -86,6 +90,8 @@ Overlay = (function() {
     } else if (this.type === "FIRST") {
       this.requestImage = this.requestFIRST;
       this.imagePath = options.imagepath != null ? options.imagepath : '';
+    } else if (this.type === "custom") {
+      this.requestImage = options.imageRequest;
     }
     if (this.view) this.view.attach(this);
   }
@@ -104,7 +110,7 @@ Overlay = (function() {
   };
 
   Overlay.prototype.request = function(req) {
-    var imgProxy, x, y, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref,
+    var imgProxy, imgURL, x, y, ___iced_passed_deferral, __iced_deferrals, __iced_k, _ref,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -116,19 +122,20 @@ Overlay = (function() {
       (function(__iced_k) {
         __iced_deferrals = new iced.Deferrals(__iced_k, {
           parent: ___iced_passed_deferral,
-          filename: "Overlay.iced",
+          filename: "/home/sean/site/Astro/tests/Overlay.coffee",
           funcname: "Overlay.request"
         });
-        _this.requestImage(x, y, __iced_deferrals.defer({
+        _this.requestImage(x, y, _this.scale, __iced_deferrals.defer({
           assign_fn: (function() {
             return function() {
-              return imgProxy = arguments[0];
+              return imgURL = arguments[0];
             };
           })(),
-          lineno: 42
+          lineno: 44
         }));
         __iced_deferrals._fulfill();
       })(function() {
+        imgProxy = new ImageProxy(imgURL, _this.placeholder);
         return __iced_k((_this.buffer[req.x] != null) ? _this.buffer[req.x][req.y] = imgProxy : (_this.buffer[req.x] = {}, _this.buffer[req.x][req.y] = imgProxy));
       });
     }
@@ -146,21 +153,21 @@ Overlay = (function() {
     }
   };
 
-  Overlay.prototype.requestSDSS = function(degX, degY, cb) {
-    var decMax, decMin, imgProxy, newurl, raMax, raMin;
+  Overlay.prototype.requestSDSS = function(degX, degY, scale, cb) {
+    var decMax, decMin, imgURL, newurl, raMax, raMin;
     decMin = degY - .256;
     decMax = degY + .256;
     raMax = degX + .256;
     raMin = degX - .256;
     newurl = "http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=" + 1.8 + "&ra=" + degX + "&dec=" + degY + "&width=1024&height=1024";
     if (this.debug) newurl = "SDSS.jpg";
-    imgProxy = new ImageProxy(newurl, this.placeholder);
-    cb(imgProxy);
+    imgURL = newurl;
+    cb(imgURL);
     return this.view.display();
   };
 
-  Overlay.prototype.requestFIRST = function(degX, degY, cb) {
-    var data, decMax, decMin, imgProxy, raMax, raMin, url, ___iced_passed_deferral, __iced_deferrals, __iced_k,
+  Overlay.prototype.requestFIRST = function(degX, degY, scale, cb) {
+    var data, decMax, decMin, imgURL, raMax, raMin, url, ___iced_passed_deferral, __iced_deferrals, __iced_k,
       _this = this;
     __iced_k = __iced_k_noop;
     ___iced_passed_deferral = iced.findDeferral(arguments);
@@ -173,7 +180,7 @@ Overlay = (function() {
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
-        filename: "Overlay.iced",
+        filename: "/home/sean/site/Astro/tests/Overlay.coffee",
         funcname: "Overlay.requestFIRST"
       });
       $.get(url, {
@@ -187,16 +194,17 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 77
+        lineno: 79
       }), 'json');
       __iced_deferrals._fulfill();
     })(function() {
+      imgURL = "";
       if (data[0]) {
-        imgProxy = new ImageProxy(_this.imagePath + data[0], _this.placeholder);
+        imgURL = _this.imagePath + data[0];
       } else {
-        imgProxy = new ImageProxy(_this.placeholder, _this.placeholder);
+        imgURL = _this.placeholder;
       }
-      cb(imgProxy);
+      cb(imgURL);
       return _this.view.display();
     });
   };
