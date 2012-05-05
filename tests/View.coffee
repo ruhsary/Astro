@@ -91,6 +91,17 @@ class View
 	notify:(type, info)=>
 		if(@handlers[type])
 			@handlers[type](info);
+	getCoordinate:(x,y)->
+		#Assertion: Stuff must be in there!
+		if(!(@pixelTranslation.x? and @pixelTranslation.y? and @position.x? and @position.y?))
+		    return null
+		pixelWidth = x - @pixelTranslation.x
+		pixelHeight = y- @pixelTranslation.y
+		###Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds###
+		degreeWidth = pixelWidth*scale/3600.0
+		degreeHeight = pixelHeight*scale/3600.0
+		degreePoint = {'x':(@position.x - degreeWidth), 'y':(@position.y + degreeHeight)}
+		return degreePoint
 	###
 	Function: imageRequestManager
 	Use: Private function to manage translation and requesting images.

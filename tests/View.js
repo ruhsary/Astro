@@ -176,6 +176,25 @@ View = (function() {
     if (this.handlers[type]) return this.handlers[type](info);
   };
 
+  View.prototype.getCoordinate = function(x, y) {
+    var degreeHeight, degreePoint, degreeWidth, pixelHeight, pixelWidth;
+    if (!((this.pixelTranslation.x != null) && (this.pixelTranslation.y != null) && (this.position.x != null) && (this.position.y != null))) {
+      return null;
+    }
+    pixelWidth = x - this.pixelTranslation.x;
+    pixelHeight = y - this.pixelTranslation.y;
+    /*Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds
+    */
+
+    degreeWidth = pixelWidth * scale / 3600.0;
+    degreeHeight = pixelHeight * scale / 3600.0;
+    degreePoint = {
+      'x': this.position.x - degreeWidth,
+      'y': this.position.y + degreeHeight
+    };
+    return degreePoint;
+  };
+
   /*
   	Function: imageRequestManager
   	Use: Private function to manage translation and requesting images.
