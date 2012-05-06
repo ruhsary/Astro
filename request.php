@@ -1,0 +1,1 @@
+<?php echo json_encode(array('00000+00000E.fits.jpg')); ?>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html >
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Movement Test</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript" src = "View.js"></script>
+<script type="text/javascript" src= "Overlay.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var view = new View(document.getElementById("container"));
+		var SDSSOverlay = new Overlay({
+		view:view,
+		alpha:1.0
+	})
+	var callback = function(x,y,scale,cb){
+		var imageURL = "placeholder.jpg";
+		cb(imageURL);
+	}
+	var KittenOverlay = new Overlay({
+		type:"custom",
+		view:view,
+		alpha:1.0,
+		imageRequest: callback
+	})
+	view.addScale(1.8)
+	view.setState(1)
+})
+
+</script>
+</head>
+<body>
+<div id="container" style="width:1024px; height:512px">
+
+</body>
+
+</html>
