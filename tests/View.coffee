@@ -1,7 +1,10 @@
 class View
 	constructor:(container)->
-		@handlers = {'translate': null, 'scale':null}
-		@mouseState = 0; #0 = none, 1 = down  2 = up
+		@handlers = {'translate': null, 'scale':null, 'box':null}
+		@mouseStateUp = @panUp
+		@state = 0
+		@mouseStateDown = @panDown
+		@mouseStateMove = @panMove
 		@mouseCoords = {x:0, y:0}
 		@canvas = document.createElement("canvas")
 		@canvas.width = container.clientWidth
@@ -18,7 +21,9 @@ class View
 		@scale = 1.8
 		@range = {lowX: 0, lowY:0, highX: 0, highY:0};
 		@register('translate', @imageRequestManager)
+		@register('box', @cleanBox)
 		@imageRequestManager()
+		@box = new BoxOverlay(@canvas, this)
 		click = ()=>
 			@display();
 			setTimeout(click, 1000);
@@ -54,6 +59,22 @@ class View
 		@scale = newScale
 		@notify('scale', @scale)
 		@display()
+	setState:(newState)=>
+		@state = newState
+		@unhookEvent(@canvas, "mousedown", @mouseStateDown)
+		@unhookEvent(@canvas, "mouseup", @mouseStateUp)
+		@unhookEvent(@canvas, "mousemove", @mouseStateMove)
+		@unhookEvent(@canvas, "mousewheel", @mousewheel)
+		if(newState == 1)
+			@box.setEvents()
+		else
+			@mouseStateUp = @panUp
+			@mouseStateDown = @panDown
+			@mouseStateMove = @panMove
+			@hookEvent(@canvas, "mousedown", @mouseStateDown)
+			@hookEvent(@canvas, "mouseup", @mouseStateUp)
+			@hookEvent(@canvas, "mousemove", @mouseStateMove)
+			@hookEvent(@canvas, "mousewheel", @mousewheel)
 	###
 	display:
 		will send requests to all obvservers asking them to draw their
@@ -76,6 +97,8 @@ class View
 				j++
 			i++
 		@ctx.restore();
+		if(@state == 1)
+			@box.display()
 	attach:(observer)->
 		@observers.push(observer)
 		@updateState(observer)
@@ -98,8 +121,8 @@ class View
 		pixelWidth = x - @pixelTranslation.x
 		pixelHeight = y- @pixelTranslation.y
 		###Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds###
-		degreeWidth = pixelWidth*scale/3600.0
-		degreeHeight = pixelHeight*scale/3600.0
+		degreeWidth = pixelWidth*@scale/3600.0
+		degreeHeight = pixelHeight*@scale/3600.0
 		degreePoint = {'x':(@position.x - degreeWidth), 'y':(@position.y + degreeHeight)}
 		return degreePoint
 	###
@@ -134,15 +157,20 @@ class View
 				j++
 			i++
 		@display()
+	cleanBox: ()=>
+		@box.enabled = true
+		@setState(0)
 	updateState:(observer)->
 		for i of @map
 			for j of @map[i]
 				observer.update('request', {x:i, y:j})
 	mouseHandler:(canvas)->
-		$(canvas).mousedown(@panDown)
-		$(canvas).mouseup(@panUp)
-		$(canvas).mousemove(@panMove)
+		@hookEvent(canvas, "mousedown", @panDown)
+		@hookEvent(canvas, "mouseup", @panUp)
 		@hookEvent(canvas, "mousewheel", @panScroll)
+		@mouseStateUp = @panUp
+		@mouseStateDown = @panDown
+		@mouseStateMove = @panMove
 	panDown:(event)=>
 		@mouseState = 1
 		@mouseCoords.x = event.clientX
@@ -181,3 +209,64 @@ class View
 			element.addEventListener(eventName, callback, false);
 		else if(element.attachEvent)
 			element.attachEvent("on" + eventName, callback);
+	unhookEvent:(element, eventName, callback)->
+		if(typeof(element) == "string")
+			element = document.getElementById(element);
+		if(element == null)
+			return;
+		if(element.removeEventListener)
+			if(eventName == 'mousewheel')
+				element.removeEventListener('DOMMouseScroll', callback, false);  
+			element.removeEventListener(eventName, callback, false);
+		else if(element.detachEvent)
+			element.detachEvent("on" + eventName, callback);
+class BoxOverlay
+	constructor: (canvas, view)->
+		@canvas = canvas
+		@ctx = @canvas.getContext('2d')
+		@ctx.fillStyle = "rgba(0,0,200,.5)"
+		@start = 0
+		@draw = false
+		@enabled = true
+		@end = 0
+		@view= view
+		@onBox = null
+		@canvas.relMouseCoords = (event)->
+			totalOffsetX = 0
+			totalOffsetY = 0
+			canvasX = 0
+			canvasY = 0
+			currentElement = this
+			while currentElement = currentElement.offsetParent
+				totalOffsetX += currentElement.offsetLeft
+				totalOffsetY += currentElement.offsetTop
+			canvasX = event.pageX - totalOffsetX
+			canvasY = event.pageY - totalOffsetY
+			return {x:canvasX, y:canvasY}
+		@boxdown =(event)=>
+			if(!@enabled)
+				return
+			@start = @canvas.relMouseCoords(event)
+			@draw = true
+		@boxmove =(event)=>
+			if(@draw and @enabled)
+				@end = @canvas.relMouseCoords(event)
+				@view.display()
+		@boxup = (event)=>
+			if(!@enabled)
+				return
+			@end = @canvas.relMouseCoords(event)
+			@view.notify('box', {start: @view.getCoordinate(@start.x, @start.y), end:@view.getCoordinate(@end.x, @end.y)})
+			@enabled = false
+			drawEnd = ()-> @draw = false; 
+			setTimeout(drawEnd, 1000)
+	setEvents:()->
+		@view.mouseStateUp = @boxup
+		@view.mouseStateDown = @boxdown
+		@view.mouseStateMove = @boxmove
+		View::hookEvent(@canvas, "mousedown", @boxdown)
+		View::hookEvent(@canvas, "mouseup", @boxup)
+		View::hookEvent(@canvas, "mousemove", @boxmove)
+	display:()->
+		if @draw
+			@ctx.fillRect(@start.x, @start.y, @end.x-@start.x, @end.y-@start.y);

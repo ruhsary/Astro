@@ -176,7 +176,6 @@ Overlay = (function() {
     raMax = degX + .256;
     raMin = degX - .256;
     url = 'http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php';
-    if (this.debug) url = 'request.php';
     (function(__iced_k) {
       __iced_deferrals = new iced.Deferrals(__iced_k, {
         parent: ___iced_passed_deferral,
@@ -194,7 +193,7 @@ Overlay = (function() {
             return data = arguments[0];
           };
         })(),
-        lineno: 79
+        lineno: 77
       }), 'json');
       __iced_deferrals._fulfill();
     })(function() {
