@@ -76,14 +76,17 @@ class Overlay
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
 		url = 'http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php'
-		await $.get url,{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, defer(data), 'json'
-		imgURL = ""
-		if(data[0])
-			imgURL = (@imagePath + data[0])
-		else
-			imgURL = @placeholder
-		cb imgURL
-		@view.display() #refresh
+		$.get url,{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, 
+	 	(data)->
+			imgURL = ""
+			if(data[0])
+				imgURL = (@imagePath + data[0])
+			else
+				imgURL = @placeholder
+			cb imgURL
+			@view.display() #refresh	
+	 	, 'json'
+
 	setAlpha:(newAlpha)=>
 		@alpha = newAlpha
 	setPlaceholder: (newPlaceholder)=>
