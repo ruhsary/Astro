@@ -64,7 +64,7 @@ class Overlay
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-		newurl ="http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024"
+		newurl ="http://astro.cs.pitt.edu/panickos/lib/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024"
 		if(@debug)
 			newurl = "SDSS.jpg"
 		imgURL = newurl
@@ -75,8 +75,9 @@ class Overlay
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-		url = 'http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php'
-		done = (data)=>
+		url = 'http://astro.cs.pitt.edu/panickos/lib/db/remote/SPATIALTREE.php'
+		$.get url,{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, 
+	 	(data)->
 			imgURL = ""
 			if(data[0])
 				imgURL = (@imagePath + data[0])
