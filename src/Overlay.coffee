@@ -41,13 +41,14 @@ class Overlay
 		if(@buffer[req.x]? and @buffer[req.x][req.y]?)
 			return;
 		else
-			await @requestImage x, y, @scale, defer imgURL
-			imgProxy = new ImageProxy(imgURL, @placeholder)
-			if(@buffer[req.x]?)
-				@buffer[req.x][req.y] = imgProxy
-			else
-				@buffer[req.x] = {}
-				@buffer[req.x][req.y] = imgProxy
+			cb = (imgURL)=>
+				imgProxy = new ImageProxy(imgURL, @placeholder)
+				if(@buffer[req.x]?)
+					@buffer[req.x][req.y] = imgProxy
+				else
+					@buffer[req.x] = {}
+					@buffer[req.x][req.y] = imgProxy
+			@requestImage(x, y, @scale, cb)
 	display:(info)=>
 		if(@buffer[info.x] and @buffer[info.x][info.y])
 			info.ctx.save()

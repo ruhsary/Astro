@@ -1,0 +1,89 @@
+<!DOCTYPE html>  <html> <head>   <title>Overlay.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Overlay.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">ImageProxy</span>
+	<span class="nx">constructor</span><span class="o">:</span><span class="nf">(imgURL, placeholder)-&gt;</span>
+		<span class="vi">@currentImage = </span><span class="nx">placeholder</span>
+		<span class="vi">@realImage = </span><span class="k">new</span> <span class="nx">Image</span><span class="p">()</span>
+		<span class="vi">@realImage.onload = </span><span class="p">()</span><span class="o">=&gt;</span>
+			<span class="vi">@currentImage = </span><span class="nx">@realImage</span>
+		<span class="vi">@realImage.src = </span><span class="nx">imgURL</span>
+	<span class="nx">display</span><span class="o">:</span><span class="nf">()-&gt;</span>
+		<span class="k">return</span> <span class="nx">@currentImage</span>
+
+<span class="k">class</span> <span class="nx">Overlay</span>
+	<span class="nv">constructor: </span><span class="nf">(options)-&gt;</span>
+		<span class="vi">@buffer= </span><span class="p">{};</span>
+		<span class="vi">@placeholder = </span><span class="nx">options</span><span class="p">.</span><span class="nx">placeholder</span><span class="p">;</span>
+		<span class="vi">@debug = </span><span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">type</span><span class="o">?</span> <span class="k">then</span> <span class="nx">options</span><span class="p">.</span><span class="nx">type</span> <span class="k">else</span> <span class="kc">false</span>
+		<span class="vi">@type = </span><span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">type</span><span class="o">?</span> <span class="k">then</span> <span class="nx">options</span><span class="p">.</span><span class="nx">type</span> <span class="k">else</span> <span class="s2">&quot;SDSS&quot;</span>
+		<span class="vi">@view = </span><span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">view</span><span class="o">?</span> <span class="k">then</span> <span class="nx">options</span><span class="p">.</span><span class="nx">view</span> <span class="k">else</span> <span class="kc">null</span>
+		<span class="vi">@alpha = </span><span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">alpha</span><span class="o">?</span> <span class="k">then</span> <span class="nx">options</span><span class="p">.</span><span class="nx">alpha</span> <span class="k">else</span> <span class="mf">1.0</span>
+		<span class="vi">@imagePath = </span><span class="s1">&#39;&#39;</span>
+		<span class="k">if</span> <span class="nx">@type</span> <span class="o">==</span> <span class="s2">&quot;SDSS&quot;</span>
+			<span class="vi">@requestImage = </span><span class="nx">@requestSDSS</span> 
+		<span class="k">else</span> <span class="k">if</span> <span class="nx">@type</span> <span class="o">==</span> <span class="s2">&quot;FIRST&quot;</span>
+			<span class="vi">@requestImage = </span><span class="nx">@requestFIRST</span>
+			<span class="vi">@imagePath = </span><span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">imagepath</span><span class="o">?</span> <span class="k">then</span> <span class="nx">options</span><span class="p">.</span><span class="nx">imagepath</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+		<span class="k">else</span> <span class="k">if</span> <span class="nx">@type</span> <span class="o">==</span> <span class="s2">&quot;custom&quot;</span>
+			<span class="vi">@requestImage = </span><span class="nx">options</span><span class="p">.</span><span class="nx">imageRequest</span>
+		<span class="k">if</span><span class="p">(</span><span class="nx">@view</span><span class="p">)</span>
+			<span class="nx">@view</span><span class="p">.</span><span class="nx">attach</span><span class="p">(</span><span class="k">this</span><span class="p">);</span> <span class="c1">#Creating view requires an attach to observer</span>
+	<span class="nx">update</span><span class="o">:</span><span class="nf">(type, info)-&gt;</span>
+		<span class="k">switch</span> <span class="nx">type</span>
+			<span class="k">when</span> <span class="s2">&quot;display&quot;</span>
+				<span class="nx">@display</span><span class="p">(</span><span class="nx">info</span><span class="p">)</span>
+			<span class="k">when</span> <span class="s2">&quot;request&quot;</span>
+				<span class="nx">@request</span><span class="p">(</span><span class="nx">info</span><span class="p">)</span>
+			<span class="k">when</span> <span class="s2">&quot;static&quot;</span>
+				<span class="k">break</span><span class="p">;</span>
+			<span class="k">else</span>
+				<span class="k">break</span><span class="p">;</span>
+	<span class="nx">request</span><span class="o">:</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span><span class="o">=&gt;</span>
+		<span class="p">[</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">req</span><span class="p">.</span><span class="nx">x</span><span class="o">*</span><span class="p">.</span><span class="mi">512</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">y</span><span class="o">*</span><span class="p">.</span><span class="mi">512</span><span class="p">]</span>
+		<span class="k">if</span><span class="p">(</span><span class="nx">@buffer</span><span class="p">[</span><span class="nx">req</span><span class="p">.</span><span class="nx">x</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">@buffer</span><span class="p">[</span><span class="nx">req</span><span class="p">.</span><span class="nx">x</span><span class="p">][</span><span class="nx">req</span><span class="p">.</span><span class="nx">y</span><span class="p">]</span><span class="o">?</span><span class="p">)</span>
+			<span class="k">return</span><span class="p">;</span>
+		<span class="k">else</span>
+			<span class="nx">await</span> <span class="nx">@requestImage</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">@scale</span><span class="p">,</span> <span class="nx">defer</span> <span class="nx">imgURL</span>
+			<span class="nv">imgProxy = </span><span class="k">new</span> <span class="nx">ImageProxy</span><span class="p">(</span><span class="nx">imgURL</span><span class="p">,</span> <span class="nx">@placeholder</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="nx">@buffer</span><span class="p">[</span><span class="nx">req</span><span class="p">.</span><span class="nx">x</span><span class="p">]</span><span class="o">?</span><span class="p">)</span>
+				<span class="nx">@buffer</span><span class="p">[</span><span class="nx">req</span><span class="p">.</span><span class="nx">x</span><span class="p">][</span><span class="nx">req</span><span class="p">.</span><span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">imgProxy</span>
+			<span class="k">else</span>
+				<span class="nx">@buffer</span><span class="p">[</span><span class="nx">req</span><span class="p">.</span><span class="nx">x</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+				<span class="nx">@buffer</span><span class="p">[</span><span class="nx">req</span><span class="p">.</span><span class="nx">x</span><span class="p">][</span><span class="nx">req</span><span class="p">.</span><span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">imgProxy</span>
+	<span class="nx">display</span><span class="o">:</span><span class="p">(</span><span class="nx">info</span><span class="p">)</span><span class="o">=&gt;</span>
+		<span class="k">if</span><span class="p">(</span><span class="nx">@buffer</span><span class="p">[</span><span class="nx">info</span><span class="p">.</span><span class="nx">x</span><span class="p">]</span> <span class="o">and</span> <span class="nx">@buffer</span><span class="p">[</span><span class="nx">info</span><span class="p">.</span><span class="nx">x</span><span class="p">][</span><span class="nx">info</span><span class="p">.</span><span class="nx">y</span><span class="p">])</span>
+			<span class="nx">info</span><span class="p">.</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">save</span><span class="p">()</span>
+			<span class="nv">info.ctx.globalAlpha = </span><span class="nx">@alpha</span>
+			<span class="nx">info</span><span class="p">.</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">translate</span><span class="p">(</span><span class="o">-</span><span class="nx">info</span><span class="p">.</span><span class="nx">x</span><span class="o">*</span><span class="mi">1024</span><span class="p">,</span> <span class="nx">info</span><span class="p">.</span><span class="nx">y</span><span class="o">*</span><span class="mi">1024</span><span class="p">);</span>
+
+			<span class="k">if</span><span class="p">(</span><span class="nx">@buffer</span><span class="p">[</span><span class="nx">info</span><span class="p">.</span><span class="nx">x</span><span class="p">][</span><span class="nx">info</span><span class="p">.</span><span class="nx">y</span><span class="p">].</span><span class="nx">display</span><span class="p">())</span>
+				<span class="nx">info</span><span class="p">.</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">drawImage</span><span class="p">(</span><span class="nx">@buffer</span><span class="p">[</span><span class="nx">info</span><span class="p">.</span><span class="nx">x</span><span class="p">][</span><span class="nx">info</span><span class="p">.</span><span class="nx">y</span><span class="p">].</span><span class="nx">display</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="nx">info</span><span class="p">.</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">restore</span><span class="p">()</span>
+	<span class="nx">requestSDSS</span><span class="o">:</span><span class="p">(</span><span class="nx">degX</span><span class="p">,</span> <span class="nx">degY</span><span class="p">,</span> <span class="nx">scale</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span><span class="o">=&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>TODO: Take requests from SDSS image database, add to imageproxy of some sort</p>             </td>             <td class="code">               <div class="highlight"><pre>		<span class="nv">decMin = </span><span class="nx">degY</span> <span class="o">-</span> <span class="p">.</span><span class="mi">256</span><span class="p">;</span>
+		<span class="nv">decMax = </span><span class="nx">degY</span> <span class="o">+</span> <span class="p">.</span><span class="mi">256</span>
+		<span class="nv">raMax = </span><span class="nx">degX</span> <span class="o">+</span> <span class="p">.</span><span class="mi">256</span> <span class="c1">#It is minus because right ascension goes right to left</span>
+		<span class="nv">raMin = </span><span class="nx">degX</span> <span class="o">-</span> <span class="p">.</span><span class="mi">256</span>
+		<span class="nx">newurl</span> <span class="o">=</span><span class="s2">&quot;http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SDSS.php?scale=#{1.8}&amp;ra=#{degX}&amp;dec=#{degY}&amp;width=1024&amp;height=1024&quot;</span>
+		<span class="k">if</span><span class="p">(</span><span class="nx">@debug</span><span class="p">)</span>
+			<span class="nv">newurl = </span><span class="s2">&quot;SDSS.jpg&quot;</span>
+		<span class="nv">imgURL = </span><span class="nx">newurl</span>
+		<span class="nx">cb</span> <span class="nx">imgURL</span>
+		<span class="nx">@view</span><span class="p">.</span><span class="nx">display</span><span class="p">();</span>
+	<span class="nv">requestFIRST: </span><span class="p">(</span><span class="nx">degX</span><span class="p">,</span><span class="nx">degY</span><span class="p">,</span> <span class="nx">scale</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span><span class="o">=&gt;</span>
+		<span class="nv">decMin = </span><span class="nx">degY</span> <span class="o">-</span> <span class="p">.</span><span class="mi">256</span><span class="p">;</span>
+		<span class="nv">decMax = </span><span class="nx">degY</span> <span class="o">+</span> <span class="p">.</span><span class="mi">256</span>
+		<span class="nv">raMax = </span><span class="nx">degX</span> <span class="o">+</span> <span class="p">.</span><span class="mi">256</span> <span class="c1">#It is minus because right ascension goes right to left</span>
+		<span class="nv">raMin = </span><span class="nx">degX</span> <span class="o">-</span> <span class="p">.</span><span class="mi">256</span>
+		<span class="nv">url = </span><span class="s1">&#39;http://astro.cs.pitt.edu/astroshelfTIM/db/remote/SPATIALTREE.php&#39;</span>
+		<span class="nx">await</span> <span class="nx">$</span><span class="p">.</span><span class="nx">get</span> <span class="nx">url</span><span class="p">,{</span><span class="nx">RAMin</span><span class="o">:</span><span class="nx">raMin</span><span class="p">,</span> <span class="nx">RAMax</span><span class="o">:</span><span class="nx">raMax</span><span class="p">,</span> <span class="nx">DecMin</span><span class="o">:</span><span class="nx">decMin</span><span class="p">,</span> <span class="nx">DecMax</span><span class="o">:</span><span class="nx">decMax</span><span class="p">},</span> <span class="nx">defer</span><span class="p">(</span><span class="nx">data</span><span class="p">),</span> <span class="s1">&#39;json&#39;</span>
+		<span class="nv">imgURL = </span><span class="s2">&quot;&quot;</span>
+		<span class="k">if</span><span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+			<span class="nv">imgURL = </span><span class="p">(</span><span class="nx">@imagePath</span> <span class="o">+</span> <span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+		<span class="k">else</span>
+			<span class="nv">imgURL = </span><span class="nx">@placeholder</span>
+		<span class="nx">cb</span> <span class="nx">imgURL</span>
+		<span class="nx">@view</span><span class="p">.</span><span class="nx">display</span><span class="p">()</span> <span class="c1">#refresh</span>
+	<span class="nx">setAlpha</span><span class="o">:</span><span class="p">(</span><span class="nx">newAlpha</span><span class="p">)</span><span class="o">=&gt;</span>
+		<span class="vi">@alpha = </span><span class="nx">newAlpha</span>
+	<span class="nv">setPlaceholder: </span><span class="p">(</span><span class="nx">newPlaceholder</span><span class="p">)</span><span class="o">=&gt;</span>
+		<span class="vi">@placeholder = </span><span class="nx">newPlaceholder</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

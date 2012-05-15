@@ -1,0 +1,277 @@
+<!DOCTYPE html>  <html> <head>   <title>View.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               View.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="k">class</span> <span class="nx">View</span>
+	<span class="nx">constructor</span><span class="o">:</span><span class="nf">(container)-&gt;</span>
+		<span class="vi">@handlers = </span><span class="p">{</span><span class="s1">&#39;translate&#39;</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="o">:</span><span class="kc">null</span><span class="p">,</span> <span class="s1">&#39;box&#39;</span><span class="o">:</span><span class="kc">null</span><span class="p">}</span>
+		<span class="vi">@mouseStateUp = </span><span class="nx">@panUp</span>
+		<span class="vi">@state = </span><span class="mi">0</span>
+		<span class="vi">@mouseStateDown = </span><span class="nx">@panDown</span>
+		<span class="vi">@mouseStateMove = </span><span class="nx">@panMove</span>
+		<span class="vi">@mouseCoords = </span><span class="p">{</span><span class="nx">x</span><span class="o">:</span><span class="mi">0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span><span class="mi">0</span><span class="p">}</span>
+		<span class="vi">@canvas = </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s2">&quot;canvas&quot;</span><span class="p">)</span>
+		<span class="vi">@canvas.width = </span><span class="nx">container</span><span class="p">.</span><span class="nx">clientWidth</span>
+		<span class="vi">@canvas.height = </span><span class="nx">container</span><span class="p">.</span><span class="nx">clientHeight</span><span class="p">;</span>
+		<span class="vi">@canvas.style.backgroundColor = </span><span class="s2">&quot;rgb(0,0,0)&quot;</span><span class="p">;</span>
+		<span class="vi">@map = </span><span class="p">{};</span>
+		<span class="nx">@mouseHandler</span><span class="p">(</span><span class="nx">@canvas</span><span class="p">)</span>
+		<span class="vi">@ctx = </span><span class="nx">@canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s1">&#39;2d&#39;</span><span class="p">)</span>
+		<span class="vi">@ctx.globalCompositeOperation = </span><span class="s2">&quot;lighter&quot;</span><span class="p">;</span>
+		<span class="nx">container</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">@canvas</span><span class="p">)</span>
+		<span class="vi">@observers = </span><span class="p">[]</span>
+		<span class="vi">@position = </span> <span class="p">{</span><span class="nx">x</span><span class="o">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span><span class="mf">0.0</span><span class="p">}</span> <span class="c1">#Position in degree plane</span>
+		<span class="vi">@pixelTranslation = </span><span class="p">{</span><span class="nv">x: </span><span class="nx">@canvas</span><span class="p">.</span><span class="nx">width</span><span class="err">/2, y:@canvas.height/2}</span>
+		<span class="vi">@scale = </span><span class="mf">1.8</span>
+		<span class="vi">@range = </span><span class="p">{</span><span class="nv">lowX: </span><span class="mi">0</span><span class="p">,</span> <span class="nx">lowY</span><span class="o">:</span><span class="mi">0</span><span class="p">,</span> <span class="nv">highX: </span><span class="mi">0</span><span class="p">,</span> <span class="nx">highY</span><span class="o">:</span><span class="mi">0</span><span class="p">};</span>
+		<span class="nx">@register</span><span class="p">(</span><span class="s1">&#39;translate&#39;</span><span class="p">,</span> <span class="nx">@imageRequestManager</span><span class="p">)</span>
+		<span class="nx">@register</span><span class="p">(</span><span class="s1">&#39;box&#39;</span><span class="p">,</span> <span class="nx">@cleanBox</span><span class="p">)</span>
+		<span class="nx">@imageRequestManager</span><span class="p">()</span>
+		<span class="vi">@box = </span><span class="k">new</span> <span class="nx">BoxOverlay</span><span class="p">(</span><span class="nx">@canvas</span><span class="p">,</span> <span class="k">this</span><span class="p">)</span>
+		<span class="nv">click = </span><span class="p">()</span><span class="o">=&gt;</span>
+			<span class="nx">@display</span><span class="p">();</span>
+			<span class="nx">setTimeout</span><span class="p">(</span><span class="nx">click</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+		<span class="nx">click</span><span class="p">();</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>	<span class="nx">translate</span>
+	<span class="nx">Translates</span> <span class="nx">X</span> <span class="nx">degrees</span><span class="p">,</span> <span class="nx">Y</span> <span class="nx">Degrees</span><span class="p">.</span>
+	<span class="nx">Not</span> <span class="nx">pixels</span><span class="o">!</span> <span class="nx">Degrees</span><span class="o">!</span> <span class="nx">Going</span> <span class="nx">translate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">is</span> <span class="nx">a</span> <span class="nx">full</span> <span class="nx">degree</span><span class="p">,</span> <span class="nx">which</span> <span class="o">is</span> <span class="mi">2</span> <span class="nx">images</span><span class="p">.</span>
+	<span class="nx">Compounds</span> <span class="nx">each</span> <span class="nx">translate</span>
+	<span class="nv">Triggers: </span><span class="s1">&#39;translate&#39;</span> <span class="nx">event</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>	<span class="nx">translate</span><span class="o">:</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span><span class="p">)</span><span class="o">=&gt;</span>
+		<span class="nx">@position</span><span class="p">.</span><span class="nx">x</span> <span class="o">+=</span> <span class="nx">x</span>
+		<span class="nx">@position</span><span class="p">.</span><span class="nx">y</span> <span class="o">+=</span> <span class="nx">y</span>
+		<span class="nx">@notify</span><span class="p">(</span><span class="s1">&#39;translate&#39;</span><span class="p">,</span> <span class="nx">@position</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>	<span class="nx">jump</span>
+	<span class="nx">moves</span> <span class="nx">X</span> <span class="nx">degrees</span><span class="p">,</span> <span class="nx">Y</span> <span class="nx">Degrees</span><span class="p">.</span>
+	<span class="nx">Not</span> <span class="nx">pixels</span><span class="o">!</span> <span class="nx">Degrees</span><span class="o">!</span> <span class="nx">Going</span> <span class="nx">translate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">is</span> <span class="nx">a</span> <span class="nx">full</span> <span class="nx">degree</span><span class="p">,</span> <span class="nx">which</span> <span class="o">is</span> <span class="mi">2</span> <span class="nx">images</span><span class="p">.</span>
+	<span class="nx">doesn</span><span class="s1">&#39;t compound</span>
+<span class="s1">	Triggers: &#39;</span><span class="nx">translate</span><span class="s1">&#39; event</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">	jump:(x,y)=&gt;</span>
+<span class="s1">		@position.x = x</span>
+<span class="s1">		@position.y = y</span>
+<span class="s1">		@notify(&#39;</span><span class="nx">translate</span><span class="s1">&#39;, @position)</span>
+<span class="s1">	addScale:(addScale)=&gt;</span>
+<span class="s1">		@scale += addScale</span>
+<span class="s1">		@notify(&#39;</span><span class="nx">scale</span><span class="s1">&#39;, @scale)</span>
+<span class="s1">		@display()</span>
+<span class="s1">	setScale:(newScale)=&gt;</span>
+<span class="s1">		@scale = newScale</span>
+<span class="s1">		@notify(&#39;</span><span class="nx">scale</span><span class="s1">&#39;, @scale)</span>
+<span class="s1">		@display()</span>
+<span class="s1">	setState:(newState)=&gt;</span>
+<span class="s1">		@state = newState</span>
+<span class="s1">		@unhookEvent(@canvas, &quot;mousedown&quot;, @mouseStateDown)</span>
+<span class="s1">		@unhookEvent(@canvas, &quot;mouseup&quot;, @mouseStateUp)</span>
+<span class="s1">		@unhookEvent(@canvas, &quot;mousemove&quot;, @mouseStateMove)</span>
+<span class="s1">		@unhookEvent(@canvas, &quot;mousewheel&quot;, @mousewheel)</span>
+<span class="s1">		if(newState == 1)</span>
+<span class="s1">			@box.setEvents()</span>
+<span class="s1">		else</span>
+<span class="s1">			@mouseStateUp = @panUp</span>
+<span class="s1">			@mouseStateDown = @panDown</span>
+<span class="s1">			@mouseStateMove = @panMove</span>
+<span class="s1">			@hookEvent(@canvas, &quot;mousedown&quot;, @mouseStateDown)</span>
+<span class="s1">			@hookEvent(@canvas, &quot;mouseup&quot;, @mouseStateUp)</span>
+<span class="s1">			@hookEvent(@canvas, &quot;mousemove&quot;, @mouseStateMove)</span>
+<span class="s1">			@hookEvent(@canvas, &quot;mousewheel&quot;, @mousewheel)</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">	display:</span>
+<span class="s1">		will send requests to all obvservers asking them to draw their</span>
+<span class="s1">		images if they have any.</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">	display:()=&gt;</span>
+<span class="s1">		@ctx.save()</span>
+<span class="s1">		@ctx.clearRect(0,0,@canvas.width,@canvas.height);</span>
+<span class="s1">		@ctx.translate(@pixelTranslation.x, @pixelTranslation.y)</span>
+<span class="s1">		zoom = 1.8/@scale;</span>
+<span class="s1">		@ctx.translate(-512*zoom, -512*zoom)</span>
+<span class="s1">		@ctx.translate(@position.x / .512*1024*zoom, -@position.y / .512*1024*zoom)</span>
+<span class="s1">		@ctx.scale(zoom, zoom)</span>
+<span class="s1">		i = @range.lowX</span>
+<span class="s1">		while(i &lt;= @range.highX)</span>
+<span class="s1">			j = @range.lowY</span>
+<span class="s1">			while(j &lt; @range.highY)</span>
+<span class="s1">				for overlay in @observers</span>
+<span class="s1">					overlay.update(&quot;display&quot;, {x:i,y:j, ctx:@ctx})			</span>
+<span class="s1">				j++</span>
+<span class="s1">			i++</span>
+<span class="s1">		@ctx.restore();</span>
+<span class="s1">		if(@state == 1)</span>
+<span class="s1">			@box.display()</span>
+<span class="s1">	attach:(observer)-&gt;</span>
+<span class="s1">		@observers.push(observer)</span>
+<span class="s1">		@updateState(observer)</span>
+<span class="s1">	register:(type, callback)=&gt;</span>
+<span class="s1">		oldLoaded = @handlers[type]</span>
+<span class="s1">		if(@handlers[type])</span>
+<span class="s1">			@handlers[type] = (view)-&gt;</span>
+<span class="s1">				if(oldLoaded)</span>
+<span class="s1">					oldLoaded(view)</span>
+<span class="s1">				callback(view)</span>
+<span class="s1">		else</span>
+<span class="s1">			@handlers[type] = callback</span>
+<span class="s1">	notify:(type, info)=&gt;</span>
+<span class="s1">		if(@handlers[type])</span>
+<span class="s1">			@handlers[type](info);</span>
+<span class="s1">	getCoordinate:(x,y)-&gt;</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">		if(!(@pixelTranslation.x? and @pixelTranslation.y? and @position.x? and @position.y?))</span>
+<span class="s1">		    return null</span>
+<span class="s1">		pixelWidth = x - @pixelTranslation.x</span>
+<span class="s1">		pixelHeight = y- @pixelTranslation.y</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">		degreeWidth = pixelWidth*@scale/3600.0</span>
+<span class="s1">		degreeHeight = pixelHeight*@scale/3600.0</span>
+<span class="s1">		degreePoint = {&#39;</span><span class="nx">x</span><span class="s1">&#39;:(@position.x - degreeWidth), &#39;</span><span class="nx">y</span><span class="s1">&#39;:(@position.y + degreeHeight)}</span>
+<span class="s1">		return degreePoint</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">	Function: imageRequestManager</span>
+<span class="s1">	Use: Private function to manage translation and requesting images.</span>
+<span class="s1">	Hooked on construction to the translate event handler</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">	imageRequestManager:()=&gt;</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">		rangeX = @canvas.width*@scale/3600.0*2 #3600 arcsecs per degree and half the width  = 7200</span>
+<span class="s1">		rangeY = @canvas.height*@scale/3600.0*2</span>
+<span class="s1">		@range.highX = Math.ceil((@position.x + rangeX)/.512)</span>
+<span class="s1">		@range.lowX = Math.floor((@position.x - rangeX)/.512)</span>
+<span class="s1">		@range.highY = Math.ceil((@position.y + rangeY)/.512)</span>
+<span class="s1">		@range.lowY = Math.floor((@position.y - rangeY)/.512)</span>
+<span class="s1">		if @range.lowX &lt; 0 then @range.lowX = 0</span>
+<span class="s1">		i = @range.lowX</span>
+<span class="s1">		while(i &lt;= @range.highX)</span>
+<span class="s1">			j = @range.lowY</span>
+<span class="s1">			while(j &lt;= @range.highY)</span>
+<span class="s1">				if(@map[i]? and @map[i][j])</span>
+<span class="s1">					j++</span>
+<span class="s1">					continue</span>
+<span class="s1">				else</span>
+<span class="s1">					for overlay in @observers</span>
+<span class="s1">						overlay.update(&#39;</span><span class="nx">request</span><span class="s1">&#39;, {x:i , y:j})</span>
+<span class="s1">					if @map[i]?</span>
+<span class="s1">						@map[i][j] = true</span>
+<span class="s1">					else</span>
+<span class="s1">						@map[i] = {}</span>
+<span class="s1">						@map[i][j] = true </span>
+<span class="s1">				j++</span>
+<span class="s1">			i++</span>
+<span class="s1">		@display()</span>
+<span class="s1">	cleanBox: ()=&gt;</span>
+<span class="s1">		@box.enabled = true</span>
+<span class="s1">		@setState(0)</span>
+<span class="s1">	updateState:(observer)-&gt;</span>
+<span class="s1">		for i of @map</span>
+<span class="s1">			for j of @map[i]</span>
+<span class="s1">				observer.update(&#39;</span><span class="nx">request</span><span class="s1">&#39;, {x:i, y:j})</span>
+<span class="s1">	mouseHandler:(canvas)-&gt;</span>
+<span class="s1">		@hookEvent(canvas, &quot;mousedown&quot;, @panDown)</span>
+<span class="s1">		@hookEvent(canvas, &quot;mouseup&quot;, @panUp)</span>
+<span class="s1">		@hookEvent(canvas, &quot;mousewheel&quot;, @panScroll)</span>
+<span class="s1">		@mouseStateUp = @panUp</span>
+<span class="s1">		@mouseStateDown = @panDown</span>
+<span class="s1">		@mouseStateMove = @panMove</span>
+<span class="s1">	panDown:(event)=&gt;</span>
+<span class="s1">		@mouseState = 1</span>
+<span class="s1">		@mouseCoords.x = event.clientX</span>
+<span class="s1">		@mouseCoords.y = event.clientY</span>
+<span class="s1">	panMove: (event)=&gt;</span>
+<span class="s1">		if(@mouseState == 1)</span>
+<span class="s1">			@translate((event.clientX-@mouseCoords.x)/ 1000 * 1.8 / @scale, (-event.clientY+@mouseCoords.y)/ 1000 * 1.8 / @scale)</span>
+<span class="s1">			@mouseCoords.x = event.clientX</span>
+<span class="s1">			@mouseCoords.y = event.clientY</span>
+<span class="s1">	panUp: (event)=&gt;</span>
+<span class="s1">		@mouseState = 0</span>
+<span class="s1">		@imageRequestManager()</span>
+<span class="s1">	panScroll: (event)=&gt;</span>
+<span class="s1">		delta = 0;</span>
+<span class="s1">		if (!event) </span>
+<span class="s1">			event = window.event;</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">		if (event.wheelDelta)</span>
+
+<span class="s1">#DIVIDER</span>
+<span class="s1">			delta = event.wheelDelta / 60;</span>
+<span class="s1">		else if (event.detail) </span>
+<span class="s1">			delta = -event.detail / 2;</span>
+<span class="s1">		if(delta &gt; 0 and @scale &gt;= 1.8)</span>
+<span class="s1">			@addScale(-.3)</span>
+<span class="s1">		else if(delta &lt;= 0)</span>
+<span class="s1">			@addScale(.3)</span>
+<span class="s1">		@imageRequestManager()</span>
+<span class="s1">	hookEvent:(element, eventName, callback)-&gt;</span>
+<span class="s1">		if(typeof(element) == &quot;string&quot;)</span>
+<span class="s1">			element = document.getElementById(element);</span>
+<span class="s1">		if(element == null)</span>
+<span class="s1">			return;</span>
+<span class="s1">		if(element.addEventListener)</span>
+<span class="s1">			if(eventName == &#39;</span><span class="nx">mousewheel</span><span class="s1">&#39;)</span>
+<span class="s1">				element.addEventListener(&#39;</span><span class="nx">DOMMouseScroll</span><span class="s1">&#39;, callback, false);  </span>
+<span class="s1">			element.addEventListener(eventName, callback, false);</span>
+<span class="s1">		else if(element.attachEvent)</span>
+<span class="s1">			element.attachEvent(&quot;on&quot; + eventName, callback);</span>
+<span class="s1">	unhookEvent:(element, eventName, callback)-&gt;</span>
+<span class="s1">		if(typeof(element) == &quot;string&quot;)</span>
+<span class="s1">			element = document.getElementById(element);</span>
+<span class="s1">		if(element == null)</span>
+<span class="s1">			return;</span>
+<span class="s1">		if(element.removeEventListener)</span>
+<span class="s1">			if(eventName == &#39;</span><span class="nx">mousewheel</span><span class="s1">&#39;)</span>
+<span class="s1">				element.removeEventListener(&#39;</span><span class="nx">DOMMouseScroll</span><span class="s1">&#39;, callback, false);  </span>
+<span class="s1">			element.removeEventListener(eventName, callback, false);</span>
+<span class="s1">		else if(element.detachEvent)</span>
+<span class="s1">			element.detachEvent(&quot;on&quot; + eventName, callback);</span>
+<span class="s1">class BoxOverlay</span>
+<span class="s1">	constructor: (canvas, view)-&gt;</span>
+<span class="s1">		@canvas = canvas</span>
+<span class="s1">		@ctx = @canvas.getContext(&#39;</span><span class="mi">2</span><span class="nx">d</span><span class="s1">&#39;)</span>
+<span class="s1">		@ctx.fillStyle = &quot;rgba(0,0,200,.5)&quot;</span>
+<span class="s1">		@start = 0</span>
+<span class="s1">		@draw = false</span>
+<span class="s1">		@enabled = true</span>
+<span class="s1">		@end = 0</span>
+<span class="s1">		@view= view</span>
+<span class="s1">		@onBox = null</span>
+<span class="s1">		@canvas.relMouseCoords = (event)-&gt;</span>
+<span class="s1">			totalOffsetX = 0</span>
+<span class="s1">			totalOffsetY = 0</span>
+<span class="s1">			canvasX = 0</span>
+<span class="s1">			canvasY = 0</span>
+<span class="s1">			currentElement = this</span>
+<span class="s1">			while currentElement = currentElement.offsetParent</span>
+<span class="s1">				totalOffsetX += currentElement.offsetLeft</span>
+<span class="s1">				totalOffsetY += currentElement.offsetTop</span>
+<span class="s1">			canvasX = event.pageX - totalOffsetX</span>
+<span class="s1">			canvasY = event.pageY - totalOffsetY</span>
+<span class="s1">			return {x:canvasX, y:canvasY}</span>
+<span class="s1">		@boxdown =(event)=&gt;</span>
+<span class="s1">			if(!@enabled)</span>
+<span class="s1">				return</span>
+<span class="s1">			@start = @canvas.relMouseCoords(event)</span>
+<span class="s1">			@draw = true</span>
+<span class="s1">		@boxmove =(event)=&gt;</span>
+<span class="s1">			if(@draw and @enabled)</span>
+<span class="s1">				@end = @canvas.relMouseCoords(event)</span>
+<span class="s1">				@view.display()</span>
+<span class="s1">		@boxup = (event)=&gt;</span>
+<span class="s1">			if(!@enabled)</span>
+<span class="s1">				return</span>
+<span class="s1">			@end = @canvas.relMouseCoords(event)</span>
+<span class="s1">			@view.notify(&#39;</span><span class="nx">box</span><span class="err">&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nv">start: </span><span class="nx">@view</span><span class="p">.</span><span class="nx">getCoordinate</span><span class="p">(</span><span class="nx">@start</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">@start</span><span class="p">.</span><span class="nx">y</span><span class="p">),</span> <span class="nx">end</span><span class="o">:</span><span class="nx">@view</span><span class="p">.</span><span class="nx">getCoordinate</span><span class="p">(</span><span class="nx">@end</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">@end</span><span class="p">.</span><span class="nx">y</span><span class="p">)})</span>
+			<span class="vi">@enabled = </span><span class="kc">false</span>
+			<span class="nv">drawEnd = </span><span class="nf">()-&gt;</span> <span class="vi">@draw = </span><span class="kc">false</span><span class="p">;</span> 
+			<span class="nx">setTimeout</span><span class="p">(</span><span class="nx">drawEnd</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+	<span class="nx">setEvents</span><span class="o">:</span><span class="nf">()-&gt;</span>
+		<span class="vi">@view.mouseStateUp = </span><span class="nx">@boxup</span>
+		<span class="vi">@view.mouseStateDown = </span><span class="nx">@boxdown</span>
+		<span class="vi">@view.mouseStateMove = </span><span class="nx">@boxmove</span>
+		<span class="nx">View</span><span class="o">::</span><span class="nx">hookEvent</span><span class="p">(</span><span class="nx">@canvas</span><span class="p">,</span> <span class="s2">&quot;mousedown&quot;</span><span class="p">,</span> <span class="nx">@boxdown</span><span class="p">)</span>
+		<span class="nx">View</span><span class="o">::</span><span class="nx">hookEvent</span><span class="p">(</span><span class="nx">@canvas</span><span class="p">,</span> <span class="s2">&quot;mouseup&quot;</span><span class="p">,</span> <span class="nx">@boxup</span><span class="p">)</span>
+		<span class="nx">View</span><span class="o">::</span><span class="nx">hookEvent</span><span class="p">(</span><span class="nx">@canvas</span><span class="p">,</span> <span class="s2">&quot;mousemove&quot;</span><span class="p">,</span> <span class="nx">@boxmove</span><span class="p">)</span>
+	<span class="nx">display</span><span class="o">:</span><span class="nf">()-&gt;</span>
+		<span class="k">if</span> <span class="nx">@draw</span>
+			<span class="nx">@ctx</span><span class="p">.</span><span class="nx">fillRect</span><span class="p">(</span><span class="nx">@start</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">@start</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">@end</span><span class="p">.</span><span class="nx">x</span><span class="o">-</span><span class="nx">@start</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">@end</span><span class="p">.</span><span class="nx">y</span><span class="o">-</span><span class="nx">@start</span><span class="p">.</span><span class="nx">y</span><span class="p">);</span>
+
+</pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Assertion: Stuff must be in there!</p>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <h2>Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds</h2>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <h1>#</h1>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>TODO: Push update of scale into another function so it doesn't recalculate so much</p>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>normalize the delta</p>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>IE and Opera</p>             </td>             <td class="code">               <div class="highlight"><pre>undefined</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
