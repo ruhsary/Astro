@@ -162,6 +162,7 @@ class View
 		@hookEvent(canvas, "mousedown", @panDown)
 		@hookEvent(canvas, "mouseup", @panUp)
 		@hookEvent(canvas, "mousewheel", @panScroll)
+		@hookEvent(canvas, "mousemove", @panMove)
 		@mouseStateUp = @panUp
 		@mouseStateDown = @panDown
 		@mouseStateMove = @panMove
