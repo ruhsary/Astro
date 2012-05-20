@@ -16,12 +16,21 @@ class Overlay
 		@type = if options.type? then options.type else "SDSS"
 		@view = if options.view? then options.view else null
 		@alpha = if options.alpha? then options.alpha else 1.0
+		
 		@imagePath = ''
 		if @type == "SDSS"
 			@requestImage = @requestSDSS 
 		else if @type == "FIRST"
 			@requestImage = @requestFIRST
 			@imagePath = if options.imagepath? then options.imagepath else ''
+		else if @type == "ANNO"
+			@requestImage = @requestAnno
+			@imagePath = if options.imagepath? then options.imagepath else ''
+			@time = if options.time? then options.time else 0.0
+			@query = if options.query? then options.query else null
+			@color = if options.color? then options.color else null
+			@source = if options.source? then options.source else null
+			
 		else if @type == "custom"
 			@requestImage = options.imageRequest
 		if(@view)
@@ -37,7 +46,17 @@ class Overlay
 			else
 				break;
 	request:(req)=>
-		[x,y] = [req.x*.512, req.y*.512]
+		
+		yp = req.y*0.512
+		x = req.centerX
+		y = req.centerY
+			
+		console.log x,y	
+				
+		spacing = 0.512/Math.cos(yp*Math.PI/180.0)
+		Mx = Math.ceil(x/spacing)
+		xp = Mx * spacing
+		
 		if(@buffer[req.x]? and @buffer[req.x][req.y]?)
 			return;
 		else
@@ -48,7 +67,7 @@ class Overlay
 				else
 					@buffer[req.x] = {}
 					@buffer[req.x][req.y] = imgProxy
-			@requestImage(x, y, @scale, cb)
+			@requestImage(xp, yp, @scale, cb)
 	display:(info)=>
 		if(@buffer[info.x] and @buffer[info.x][info.y])
 			info.ctx.save()
@@ -59,23 +78,28 @@ class Overlay
 				info.ctx.drawImage(@buffer[info.x][info.y].display(), 0, 0)
 			info.ctx.restore()
 	requestSDSS:(degX, degY, scale, cb)=>
+			
 		# TODO: Take requests from SDSS image database, add to imageproxy of some sort
 		decMin = degY - .256;
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-		newurl ="http://astro.cs.pitt.edu/panickos/lib/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024"
+			
+		newurl ="./lib/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024&opt=GL"
 		if(@debug)
 			newurl = "SDSS.jpg"
 		imgURL = newurl
 		cb imgURL
 		@view.display();
-	requestFIRST: (degX,degY, scale, cb)=>
+	
+	requestFIRST: (degX,degY, scale, cb)=> 
+		
 		decMin = degY - .256;
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-		url = 'http://astro.cs.pitt.edu/panickos/lib/db/remote/SPATIALTREE.php'
+		
+		url = './lib/db/remote/SPATIALTREE.php'
 		done = (data)->
 			imgURL = ""
 			if(data[0])
@@ -85,6 +109,22 @@ class Overlay
 			cb imgURL
 			@view.display() #refresh				
 		$.get url,{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, done, 'json'
+	
+	requestAnno: (degX, degY, scale, cb)=>
+		
+		decMin = degY - .256;
+		decMax = degY + .256
+		raMax = degX + .256 #It is minus because right ascension goes right to left
+		raMin = degX - .256
+				
+		imgURL = "./lib/createOverlay.php?width=1024&height=1024
+			&RAMin=#{raMin}&RAMax=#{raMax}&DecMin=#{decMin}&DecMax=#{decMax}&scale=1.8&diam=2
+			&ms=#{@time}&query=#{@query}&type=#{@source}&color=#{@color}"
+						
+		cb imgURL
+		@view.display();
+	deleteOverlay:()=>
+		@view.detach(this)
 
 	setAlpha:(newAlpha)=>
 		@alpha = newAlpha

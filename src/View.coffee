@@ -39,14 +39,6 @@ class View
 		@position.x += x
 		@position.y += y
 		@notify('translate', @position)
-
-	###
-	jump
-	moves X degrees, Y Degrees.
-	Not pixels! Degrees! Going translate(0,1) is a full degree, which is 2 images.
-	doesn't compound
-	Triggers: 'translate' event
-	###
 	jump:(x,y)=>
 		@position.x = x
 		@position.y = y
@@ -75,11 +67,6 @@ class View
 			@hookEvent(@canvas, "mouseup", @mouseStateUp)
 			@hookEvent(@canvas, "mousemove", @mouseStateMove)
 			@hookEvent(@canvas, "mousewheel", @mousewheel)
-	###
-	display:
-		will send requests to all obvservers asking them to draw their
-		images if they have any.
-	###
 	display:()=>
 		@ctx.save()
 		@ctx.clearRect(0,0,@canvas.width,@canvas.height);
@@ -102,6 +89,11 @@ class View
 	attach:(observer)->
 		@observers.push(observer)
 		@updateState(observer)
+	detach:(observer)->
+		for overlay in @observers
+			if(overlay == observer)
+				@observers.pop()
+				break
 	register:(type, callback)=>
 		oldLoaded = @handlers[type]
 		if(@handlers[type])
@@ -119,7 +111,7 @@ class View
 		if(!(@pixelTranslation.x? and @pixelTranslation.y? and @position.x? and @position.y?))
 		    return null
 		pixelWidth = x - @pixelTranslation.x
-		pixelHeight = y- @pixelTranslation.y
+		pixelHeight = y - @pixelTranslation.y
 		###Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds###
 		degreeWidth = pixelWidth*@scale/3600.0
 		degreeHeight = pixelHeight*@scale/3600.0
@@ -138,8 +130,10 @@ class View
 		@range.lowX = Math.floor((@position.x - rangeX)/.512)
 		@range.highY = Math.ceil((@position.y + rangeY)/.512)
 		@range.lowY = Math.floor((@position.y - rangeY)/.512)
+		console.log @range.highX, @range.lowX
 		if @range.lowX < 0 then @range.lowX = 0
 		i = @range.lowX
+				
 		while(i <= @range.highX)
 			j = @range.lowY
 			while(j <= @range.highY)
@@ -148,7 +142,7 @@ class View
 					continue
 				else
 					for overlay in @observers
-						overlay.update('request', {x:i , y:j})
+						overlay.update('request', {x:i , y:j, centerX:@position.x, centerY:@position.y})
 					if @map[i]?
 						@map[i][j] = true
 					else
@@ -163,7 +157,7 @@ class View
 	updateState:(observer)->
 		for i of @map
 			for j of @map[i]
-				observer.update('request', {x:i, y:j})
+				observer.update('request', {x:i, y:j, centerX:@position.x, centerY:@position.y})
 	mouseHandler:(canvas)->
 		@hookEvent(canvas, "mousedown", @panDown)
 		@hookEvent(canvas, "mouseup", @panUp)
@@ -270,3 +264,4 @@ class BoxOverlay
 	display:()->
 		if @draw
 			@ctx.fillRect(@start.x, @start.y, @end.x-@start.x, @end.y-@start.y);
+			console.log @start.x, @start.y, @end.x, @end.y
