@@ -152,9 +152,7 @@ class View
 				else
 					if(Mx == 0)
 						yp = j*0.512
-						x = @position.x
-						y = @position.y
-
+						
 						spacing = 0.512/Math.cos(yp*Math.PI/180.0)
 						Mx = Math.ceil(i*0.512/spacing)
 						
@@ -180,9 +178,26 @@ class View
 		@box.enabled = true
 		@setState(0)
 	updateState:(observer)->
-		for i of @map
-			for j of @map[i]
-				observer.update('request', {x:i, y:j})
+		for j of @map
+			Mx = 0
+			for i of @map[j]
+				
+				if(Mx == 0)
+					yp = j*0.512
+					
+					spacing = 0.512/Math.cos(yp*Math.PI/180.0)
+					Mx = Math.ceil(i*0.512/spacing)
+					
+					xp = Mx * spacing
+					
+					console.log xp,yp, Mx, j, spacing
+					
+				else
+					Mx++
+					xp = Mx * spacing
+			
+				observer.update('request', {x:i, y:j, RA:xp, Dec:yp})
+				
 	mouseHandler:(canvas)->
 		@hookEvent(canvas, "mousedown", @panDown)
 		@hookEvent(canvas, "mouseup", @panUp)
