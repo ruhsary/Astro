@@ -57,7 +57,7 @@ class Overlay
 				else
 					@buffer[req.x] = {}
 					@buffer[req.x][req.y] = imgProxy
-			@requestImage(req.RA, -req.Dec, @scale, cb)
+			@requestImage(req.RA, req.Dec, @scale, cb)
 	display:(info)=>
 		if(@buffer[info.x] and @buffer[info.x][info.y])
 			info.ctx.save()
