@@ -37,7 +37,7 @@ class View
 	###
 	translate:(x,y)=>
 		@position.x += x
-		@position.y += y
+		@position.y -= y
 		@notify('translate', @position)
 	jump:(x,y)=>
 		@position.x = x
@@ -73,7 +73,7 @@ class View
 		@ctx.translate(@pixelTranslation.x, @pixelTranslation.y)
 		zoom = 1.8/@scale;
 		@ctx.translate(-512*zoom, -512*zoom)
-		@ctx.translate(@position.x / .512*1024*zoom, -@position.y / .512*1024*zoom)
+		@ctx.translate(@position.x / .512*1024*zoom, @position.y / .512*1024*zoom)
 		@ctx.scale(zoom, zoom)
 		i = @range.lowX
 		while(i <= @range.highX)
@@ -141,8 +141,8 @@ class View
 		@range.lowY = Math.floor((@position.y - rangeY)/.512)
 		
 		if @range.lowX < 0 then @range.lowX = 0
-		j = @range.lowY		
-		while(j <= @range.highY)
+		j = @range.highY		
+		while(j >= @range.lowY)
 			i = @range.lowX
 			Mx = 0
 			while(i <= @range.highX)
@@ -157,9 +157,7 @@ class View
 						Mx = Math.ceil(i*0.512/spacing)
 						
 						xp = Mx * spacing
-						
-						console.log xp,yp, Mx, j, spacing
-						
+												
 					else
 						Mx++
 						xp = Mx * spacing
@@ -172,15 +170,15 @@ class View
 						@map[i] = {}
 						@map[i][j] = true 
 				i++
-			j++
+			j--
 		@display()
 	cleanBox: ()=>
 		@box.enabled = true
 		@setState(0)
 	updateState:(observer)->
-		for j of @map
+		for i of @map
 			Mx = 0
-			for i of @map[j]
+			for j of @map[i]
 				
 				if(Mx == 0)
 					yp = j*0.512
@@ -189,9 +187,7 @@ class View
 					Mx = Math.ceil(i*0.512/spacing)
 					
 					xp = Mx * spacing
-					
-					console.log xp,yp, Mx, j, spacing
-					
+										
 				else
 					Mx++
 					xp = Mx * spacing
@@ -305,4 +301,3 @@ class BoxOverlay
 	display:()->
 		if @draw
 			@ctx.fillRect(@start.x, @start.y, @end.x-@start.x, @end.y-@start.y);
-			console.log @start.x, @start.y, @end.x, @end.y

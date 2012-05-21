@@ -57,25 +57,27 @@ class Overlay
 				else
 					@buffer[req.x] = {}
 					@buffer[req.x][req.y] = imgProxy
-			@requestImage(req.RA, req.Dec, @scale, cb)
+			@requestImage(req.RA, -req.Dec, @scale, cb)
 	display:(info)=>
 		if(@buffer[info.x] and @buffer[info.x][info.y])
 			info.ctx.save()
 			info.ctx.globalAlpha = @alpha
 			info.ctx.translate(-info.x*1024, info.y*1024);
-
+			
 			if(@buffer[info.x][info.y].display())
 				info.ctx.drawImage(@buffer[info.x][info.y].display(), 0, 0)
 			info.ctx.restore()
 	requestSDSS:(degX, degY, scale, cb)=>
+		
+		console.log degX, degY
 			
 		# TODO: Take requests from SDSS image database, add to imageproxy of some sort
 		decMin = degY - .256;
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-			
-		newurl ="./lib/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024&opt=GL"
+		
+		newurl ="./lib/db/remote/SDSS.php?scale=#{1.8}&ra=#{degX}&dec=#{degY}&width=1024&height=1024&opt="
 		if(@debug)
 			newurl = "SDSS.jpg"
 		imgURL = newurl
@@ -101,11 +103,13 @@ class Overlay
 	
 	requestAnno: (degX, degY, scale, cb)=>
 		
+		console.log degX, degY
+		
 		decMin = degY - .256;
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-				
+		
 		imgURL = "./lib/createOverlay.php?width=1024&height=1024
 			&RAMin=#{raMin}&RAMax=#{raMax}&DecMin=#{decMin}&DecMax=#{decMax}&scale=1.8&diam=2
 			&ms=#{@time}&query=#{@query}&type=#{@source}&color=#{@color}"
