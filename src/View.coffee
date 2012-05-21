@@ -92,7 +92,8 @@ class View
 	detach:(observer)->
 		for overlay in @observers
 			if(overlay == observer)
-				@observers.pop()
+				overlay.setAlpha(0)
+				overlay = null
 				break
 	register:(type, callback)=>
 		oldLoaded = @handlers[type]
@@ -117,6 +118,14 @@ class View
 		degreeHeight = pixelHeight*@scale/3600.0
 		degreePoint = {'x':(@position.x - degreeWidth), 'y':(@position.y + degreeHeight)}
 		return degreePoint
+	getBoundingBox:()=>
+		rangeX = @canvas.width*@scale/3600.0*2 #3600 arcsecs per degree and half the width  = 7200
+		rangeY = @canvas.height*@scale/3600.0*2
+		@range.maxRA = Math.ceil((@position.x + rangeX)/.512)
+		@range.minRA = Math.floor((@position.x - rangeX)/.512)
+		@range.maxDec = Math.ceil((@position.y + rangeY)/.512)
+		@range.minDec = Math.floor((@position.y - rangeY)/.512)
+		return range
 	###
 	Function: imageRequestManager
 	Use: Private function to manage translation and requesting images.
@@ -130,26 +139,42 @@ class View
 		@range.lowX = Math.floor((@position.x - rangeX)/.512)
 		@range.highY = Math.ceil((@position.y + rangeY)/.512)
 		@range.lowY = Math.floor((@position.y - rangeY)/.512)
-		console.log @range.highX, @range.lowX
+		
 		if @range.lowX < 0 then @range.lowX = 0
-		i = @range.lowX
-				
-		while(i <= @range.highX)
-			j = @range.lowY
-			while(j <= @range.highY)
+		j = @range.lowY		
+		while(j <= @range.highY)
+			i = @range.lowX
+			Mx = 0
+			while(i <= @range.highX)
 				if(@map[i]? and @map[i][j])
-					j++
+					i++
 					continue
 				else
+					if(Mx == 0)
+						yp = j*0.512
+						x = @position.x
+						y = @position.y
+
+						spacing = 0.512/Math.cos(yp*Math.PI/180.0)
+						Mx = Math.ceil(i*0.512/spacing)
+						
+						xp = Mx * spacing
+						
+						console.log xp,yp, Mx, j, spacing
+						
+					else
+						Mx++
+						xp = Mx * spacing
+						
 					for overlay in @observers
-						overlay.update('request', {x:i , y:j, centerX:@position.x, centerY:@position.y})
+						overlay.update('request', {x:i , y:j, RA:xp, Dec:yp})
 					if @map[i]?
 						@map[i][j] = true
 					else
 						@map[i] = {}
 						@map[i][j] = true 
-				j++
-			i++
+				i++
+			j++
 		@display()
 	cleanBox: ()=>
 		@box.enabled = true
@@ -157,7 +182,7 @@ class View
 	updateState:(observer)->
 		for i of @map
 			for j of @map[i]
-				observer.update('request', {x:i, y:j, centerX:@position.x, centerY:@position.y})
+				observer.update('request', {x:i, y:j})
 	mouseHandler:(canvas)->
 		@hookEvent(canvas, "mousedown", @panDown)
 		@hookEvent(canvas, "mouseup", @panUp)

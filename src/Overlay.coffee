@@ -46,17 +46,7 @@ class Overlay
 			else
 				break;
 	request:(req)=>
-		
-		yp = req.y*0.512
-		x = req.centerX
-		y = req.centerY
 			
-		console.log x,y	
-				
-		spacing = 0.512/Math.cos(yp*Math.PI/180.0)
-		Mx = Math.ceil(x/spacing)
-		xp = Mx * spacing
-		
 		if(@buffer[req.x]? and @buffer[req.x][req.y]?)
 			return;
 		else
@@ -67,7 +57,7 @@ class Overlay
 				else
 					@buffer[req.x] = {}
 					@buffer[req.x][req.y] = imgProxy
-			@requestImage(xp, yp, @scale, cb)
+			@requestImage(req.RA, req.Dec, @scale, cb)
 	display:(info)=>
 		if(@buffer[info.x] and @buffer[info.x][info.y])
 			info.ctx.save()
@@ -98,14 +88,9 @@ class Overlay
 		decMax = degY + .256
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
-<<<<<<< HEAD
-		
-		url = './lib/db/remote/SPATIALTREE.php'
-		done = (data)->
-=======
+
 		url = 'http://astro.cs.pitt.edu/panickos/lib/db/remote/SPATIALTREE.php'
 		done = (data)=>
->>>>>>> 9464f6a25f9182ace2331746816788355d9baf89
 			imgURL = ""
 			if(data[0])
 				imgURL = (@imagePath + data[0])
