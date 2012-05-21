@@ -96,8 +96,7 @@ class Overlay
 				imgURL = (@imagePath + data[0])
 			else
 				imgURL = @placeholder
-			cb imgURL
-			@view.display() #refresh				
+			cb imgURL				
 		$.get url,{RAMin:raMin, RAMax:raMax, DecMin:decMin, DecMax:decMax}, done, 'json'
 	
 	requestAnno: (degX, degY, scale, cb)=>
