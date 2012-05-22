@@ -112,19 +112,20 @@ class View
 		if(!(@pixelTranslation.x? and @pixelTranslation.y? and @position.x? and @position.y?))
 		    return null
 		pixelWidth = x - @pixelTranslation.x
-		pixelHeight = y - @pixelTranslation.y
+		pixelHeight = @pixelTranslation.y - y
 		###Pixels*arcsec/pixel = arcsec per difference. 1 degree = 3600 arcseconds###
 		degreeWidth = pixelWidth*@scale/3600.0
 		degreeHeight = pixelHeight*@scale/3600.0
 		degreePoint = {'x':(@position.x - degreeWidth), 'y':(@position.y + degreeHeight)}
 		return degreePoint
 	getBoundingBox:()=>
-		rangeX = @canvas.width*@scale/3600.0*2 #3600 arcsecs per degree and half the width  = 7200
-		rangeY = @canvas.height*@scale/3600.0*2
+		rangeX = @canvas.width*@scale/3600.0 #3600 arcsecs per degree and half the width  = 7200
+		rangeY = @canvas.height*@scale/3600.0
 		@range.maxRA = Math.ceil((@position.x + rangeX)/.512)
 		@range.minRA = Math.floor((@position.x - rangeX)/.512)
 		@range.maxDec = Math.ceil((@position.y + rangeY)/.512)
 		@range.minDec = Math.floor((@position.y - rangeY)/.512)
+		console.log @range
 		return range
 	###
 	Function: imageRequestManager
@@ -154,7 +155,7 @@ class View
 						yp = j*0.512
 						
 						spacing = 0.512/Math.cos(yp*Math.PI/180.0)
-						Mx = Math.ceil(i*0.512/spacing)
+						Mx = Math.round(i*0.512/spacing)
 						
 						xp = Mx * spacing
 												
