@@ -57,12 +57,12 @@ class Overlay
 				else
 					@buffer[req.x] = {}
 					@buffer[req.x][req.y] = imgProxy
-			@requestImage(req.RA, req.Dec, @scale, cb)
+			@requestImage(req.RA, -req.Dec, @scale, cb)
 	display:(info)=>
 		if(@buffer[info.x] and @buffer[info.x][info.y])
 			info.ctx.save()
 			info.ctx.globalAlpha = @alpha
-			info.ctx.translate(-info.x*1024, info.y*1024);
+			info.ctx.translate(-info.x*1024, -info.y*1024);
 			
 			if(@buffer[info.x][info.y].display())
 				info.ctx.drawImage(@buffer[info.x][info.y].display(), 0, 0)
@@ -91,7 +91,7 @@ class Overlay
 		raMax = degX + .256 #It is minus because right ascension goes right to left
 		raMin = degX - .256
 
-		url = 'http://astro.cs.pitt.edu/panickos/lib/db/remote/SPATIALTREE.php'
+		url = './lib/db/remote/SPATIALTREE.php'
 		done = (data)=>
 			imgURL = ""
 			if(data[0])

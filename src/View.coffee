@@ -37,7 +37,7 @@ class View
 	###
 	translate:(x,y)=>
 		@position.x += x
-		@position.y += y
+		@position.y -= y
 		@notify('translate', @position)
 	jump:(x,y)=>
 		@position.x = x
@@ -73,7 +73,7 @@ class View
 		@ctx.translate(@pixelTranslation.x, @pixelTranslation.y)
 		zoom = 1.8/@scale;
 		@ctx.translate(-512*zoom, -512*zoom)
-		@ctx.translate(@position.x / .512*1024*zoom, -@position.y / .512*1024*zoom)
+		@ctx.translate(@position.x / .512*1024*zoom, @position.y / .512*1024*zoom)
 		@ctx.scale(zoom, zoom)
 		i = @range.lowX
 		while(i <= @range.highX)
