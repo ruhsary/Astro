@@ -1,6 +1,6 @@
 <?php
 
-	header("Content-type: text/plain");
+	header("Content-type: text/html");
 
 		error_reporting(-1);
 		$_GET["ra"] = 200;
@@ -8,7 +8,6 @@
 		$_GET["radius"] = 10;
 		$_GET["scale"] = 0; 
 		
-
 /* parse the xml to get the fields to wget with*/
 
 	function parseSDSS($output) {
