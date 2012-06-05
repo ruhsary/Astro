@@ -4,19 +4,18 @@
 <title>HTM Coffee Test</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
-<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
-<script type="text/javascript" src="webgl-utils.js"></script>
-<script type="text/javascript" src="SkyView.js"></script>
-<script type="text/javascript" src="WebGL.js.js"></script>
-<script type="text/javascript" src="HTM.js"></script>          
-
+<script type="text/javascript" src="src/glMatrix-0.9.5.min.js"></script>
+<script type="text/javascript" src="src/webgl-utils.js"></script>
+<script type="text/javascript" src="lib/WebGL.js.js"></script>
+<script type="text/javascript" src="lib/HTM.js"></script>          
+<script type="text/javascript" src="lib/SkyView.js"></script>
 <script type="text/javascript" >          
 
 	function start(){
 		
-		var SkyView = new SkyView({
+		var SkyView = new window.SkyView({
 			canvas:document.getElementById("canvas")
-		})
+		});
 		
 	}
 
