@@ -1,9 +1,11 @@
-class SkyView extends webGL
+#= require WebGL
+
+class SkyView extends WebGL
 	
 	@HTM = 0
 	
-	constructor: () ->
-		super()
+	constructor: (options) ->
+		super(options)
 		@HTM = new HTM()
 	
 	render: ()=>
