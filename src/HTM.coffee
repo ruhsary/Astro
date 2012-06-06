@@ -62,8 +62,9 @@ class HTM
 		@VertexPositionBuffer.numItems = 8 * Math.pow(4,@levels) * 3
 		return
 	
+	# | v1 + v2 | 
 	magnitude: (v1, v2) =>
-		Math.sqrt(v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])
+		return Math.pow(Math.pow(v1[0] + v2[0], 2) + Math.pow(v1[1] + v2[1], 2) + Math.pow(v1[2] + v2[2], 2), 0.5)
 	subdivide: (v,l) =>
 				
 		# new vertex 1
