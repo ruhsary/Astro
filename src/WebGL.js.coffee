@@ -43,7 +43,7 @@ class window.WebGL
 		if(id is "vertex")
 			$.ajax
 				async: false,
-				url: './shader.vs',
+				url: './src/shader.vs',
 				success: (data)=>
 					source = $(data).html()
 					shader = @gl.createShader(@gl.VERTEX_SHADER)
@@ -54,7 +54,7 @@ class window.WebGL
 		else
 			$.ajax
 				async: false,
-				url: './shader.fs',
+				url: './src/shader.fs',
 				success: (data)=>
 					source = $(data).html()
 					shader = @gl.createShader(@gl.FRAGMENT_SHADER)
