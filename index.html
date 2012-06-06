@@ -11,11 +11,14 @@
 <script type="text/javascript" src="lib/WebGL.js.js"></script>
 <script type="text/javascript" src="lib/HTM.js"></script>          
 <script type="text/javascript" src="lib/SkyView.js"></script>
-<script type="text/javascript" >          
 
+<script type="text/javascript">          
+		
+	var SkyView;
+		
 	function start(){
 		
-		var SkyView = new window.SkyView({
+		SkyView = new window.SkyView({
 			canvas:document.getElementById("canvas")
 		});
 		
@@ -25,9 +28,9 @@
 
 </head>
 
-<body onload="start()">
+<body onload="start()" onkeypress="SkyView.keyPressed(event)">
 
-    <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+<canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
 
 </body>
 

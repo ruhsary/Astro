@@ -3,7 +3,7 @@ class window.WebGL
 	@gl = 0
 	@shaderProgram = 0
 	@mvMatrix = 0
-	@mvMatrixStack = []
+	@mvMatrixStack = null
 	@pMatrix = 0
 	
 	constructor: (options) ->
@@ -18,6 +18,7 @@ class window.WebGL
 		
 		@mvMatrix = mat4.create()
 		@pMatrix = mat4.create()
+		@mvMatrixStack = []
 		
 		return
 				
@@ -50,7 +51,6 @@ class window.WebGL
 					return
 				,
 			    dataType: 'html'
-			
 		else
 			$.ajax
 				async: false,
@@ -89,7 +89,10 @@ class window.WebGL
 
 		@shaderProgram.vertexPositionAttribute = @gl.getAttribLocation(@shaderProgram, "aVertexPosition")
 		@gl.enableVertexAttribArray(@shaderProgram.vertexPositionAttribute)
-
+		
+		@shaderProgram.vertexColorAttribute = @gl.getAttribLocation(@shaderProgram, "aVertexColor")
+		@gl.enableVertexAttribArray(@shaderProgram.vertexColorAttribute)
+		
 		@shaderProgram.pMatrixUniform = @gl.getUniformLocation(@shaderProgram, "uPMatrix")
 		@shaderProgram.mvMatrixUniform = @gl.getUniformLocation(@shaderProgram, "uMVMatrix")
 		return
@@ -110,17 +113,31 @@ class window.WebGL
 		@gl.uniformMatrix4fv(@shaderProgram.pMatrixUniform, false, @pMatrix)
 		@gl.uniformMatrix4fv(@shaderProgram.mvMatrixUniform, false, @mvMatrix)
 		return
-    
+
+	degToRad: (deg)=>
+		deg * Math.PI / 180.0
+
 	preRender: () =>
 		
 		@gl.viewport(0, 0, @gl.viewportWidth, @gl.viewportHeight)
 		@gl.clear(@gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT)
 
-		mat4.perspective(45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 100.0, @pMatrix)
+		mat4.perspective(45, @gl.viewportWidth / @gl.viewportHeight, 0.0001, 100.0, @pMatrix)
 		mat4.identity(@mvMatrix)
+		
 		return
 			
-	postRender: () =>
-		mat4.translate(@mvMatrix, [0.0, 0.0, -50.0]);
+	postRender: (rotation, translation) =>
+				
+		this.mvPushMatrix()
+		
+		mat4.translate(@mvMatrix, translation);
+		mat4.rotate(@mvMatrix, this.degToRad(rotation[0]), [1,0,0])
+		mat4.rotate(@mvMatrix, this.degToRad(rotation[1]), [0,1,0])
+		mat4.rotate(@mvMatrix, this.degToRad(rotation[2]), [0,0,1])
+		
 		this.setMatrixUniforms()
+		
+		this.mvPopMatrix()
+		
 		return

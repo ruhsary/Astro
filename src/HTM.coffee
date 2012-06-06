@@ -1,11 +1,67 @@
 class HTM
 	
 	@verts = null
-	@VertexPositionBuffer = 0
+	@VertexPositionBuffer = null
+	@VertexColorBuffer = null
 	
 	constructor: (@levels, @gl) ->
 		this.createHTM()
+	
+	debugColor: ()=>
+		
+		color = []
+		
+		colors = [
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0]],
+			
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0]],
+			
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0]],
+			
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0]]
+			
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0]],
+			
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0]],
+			
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0]],
+			
+			[[1.0, 0.0, 0.0, 1.0],
+			[0.0, 0.0, 1.0, 1.0],
+			[0.0, 1.0, 0.0, 1.0]]
+		]
 
+		depth = Math.pow(4, @levels)
+
+		for num in [depth..0]
+			for j in colors
+				for k in j
+					for l in k
+						color.push(l)
+
+		@VertexColorBuffer = @gl.createBuffer()
+		@gl.bindBuffer(@gl.ARRAY_BUFFER, @VertexColorBuffer)
+
+		@gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(color), @gl.STATIC_DRAW)
+		@VertexColorBuffer.itemSize = 4
+		@VertexColorBuffer.numItems = 8 * Math.pow(4,@levels) * 3
+			
+		return
+	
 	createHTM: () =>
 		
 		@verts = []
@@ -60,11 +116,15 @@ class HTM
 		@gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(@verts), @gl.STATIC_DRAW)
 		@VertexPositionBuffer.itemSize = 3
 		@VertexPositionBuffer.numItems = 8 * Math.pow(4,@levels) * 3
+		
+		this.debugColor()
+		
 		return
 	
 	# | v1 + v2 | 
 	magnitude: (v1, v2) =>
 		return Math.pow(Math.pow(v1[0] + v2[0], 2) + Math.pow(v1[1] + v2[1], 2) + Math.pow(v1[2] + v2[2], 2), 0.5)
+	
 	subdivide: (v,l) =>
 				
 		# new vertex 1
@@ -88,7 +148,7 @@ class HTM
 		unless(w1[1]?) then w1[1] = 0  	
 		w1.push((v[0][2] + v[2][2]) / mag)
 		unless(w1[2]?) then w1[2] = 0
-			
+		
 		# new vertex 3
 		mag = this.magnitude(v[0], v[1])
 		
@@ -115,12 +175,20 @@ class HTM
 						@verts.push component
 		else
 			for triangles in newTriangles # iterate over triangles
-				this.subdivide(triangles, l-1);
+				this.subdivide(triangles, l-1)
 		return
 	bind: (gl, shaderProgram) =>
+	
 		gl.bindBuffer(gl.ARRAY_BUFFER, @VertexPositionBuffer)
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, @VertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, @VertexColorBuffer)
+		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, @VertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
+		
 		return
-	render: (gl) =>
-		gl.drawArrays(gl.TRIANGLES, 0, @VertexPositionBuffer.numItems);
+		
+	render: (gl, renderMode) =>
+
+		gl.drawArrays(renderMode, 0, @VertexPositionBuffer.numItems)
+		
 		return
