@@ -18,6 +18,8 @@ class window.WebGL
 		
 		@mvMatrix = mat4.create()
 		@pMatrix = mat4.create()
+		
+		return
 				
 	### initialize the webgl context in the canvas ###
 	
