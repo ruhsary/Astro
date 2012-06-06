@@ -67,7 +67,7 @@ class HTM
 	subdivide: (v,l) =>
 				
 		# new vertex 1
-		mag = magnitude(v[1], v[2])
+		mag = this.magnitude(v[1], v[2])
 		
 		w0 = []
 		w0.push((v[1][0] + v[2][0]) / mag)
@@ -78,7 +78,7 @@ class HTM
 		unless(w0[2]?) then w0[2] = 0 
 		
 		# new vertex 2
-		mag = magnitude(v[0], v[2])
+		mag = this.magnitude(v[0], v[2])
 		
 		w1 = [] 
 		w1.push((v[0][0] + v[2][0]) / mag)
@@ -89,7 +89,7 @@ class HTM
 		unless(w1[2]?) then w1[2] = 0
 			
 		# new vertex 3
-		mag = magnitude(v[0], v[1])
+		mag = this.magnitude(v[0], v[1])
 		
 		w2 = []
 		w2.push((v[0][0] + v[1][0]) / mag)

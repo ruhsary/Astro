@@ -3,6 +3,7 @@
 class SkyView extends WebGL
 	
 	@HTM = 0
+	@rotation = {x:0.0, y:0.0}
 	
 	constructor: (options) ->
 		super(options)
