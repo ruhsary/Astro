@@ -1,13 +1,14 @@
 class HTM
 	
-	@verts = []
+	@verts = null
 	@VertexPositionBuffer = 0
-	@VertexColorBuffer = 0
 	
-	constructor: (@levels) ->
-		createHTM()
-		
+	constructor: (@levels, @gl) ->
+		this.createHTM()
+
 	createHTM: () =>
+		
+		@verts = []
 		
 		initTriangles = [
 			# T0
@@ -46,15 +47,21 @@ class HTM
 		
 		if @levels is 0
 			for triangles in initTriangles # iterate over triangles
-				for verts in triangles # iterate over vertices
-					for components in verts #iterate over components
-						@verts.push components # add components to list
-		
+				for vert in triangles # iterate over vertices
+					for component in vert
+						@verts.push component
 		else
 			for triangles in initTriangles
-				subdivide(triangles, @levels-1)
-			
-	subdivide: (v) =>
+				this.subdivide(triangles, @levels-1)
+				
+		@VertexPositionBuffer = @gl.createBuffer()
+		@gl.bindBuffer(@gl.ARRAY_BUFFER, @VertexPositionBuffer)
+
+		@gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(@verts), @gl.STATIC_DRAW)
+		@VertexPositionBuffer.itemSize = 3
+		@VertexPositionBuffer.numItems = 8 * Math.pow(4,@levels) * 3
+		return
+	subdivide: (v,l) =>
 		
 		# new vertex 1
 		
@@ -70,9 +77,9 @@ class HTM
 		
 		w1 = [] 
 		w1.push(v[0][0] + v[2][0]) / Math.abs(v[0][0] + v[2][0])
-		unless(w1[0]?) then w1[0] = 0; 
+		unless(w1[0]?) then w1[0] = 0
 		w1.push(v[0][1] + v[2][1]) / Math.abs(v[0][1] + v[2][1])
-		unless(w1[1]?) then w1[1] = 0;  	
+		unless(w1[1]?) then w1[1] = 0  	
 		w1.push(v[0][2] + v[2][2]) / Math.abs(v[0][2] + v[2][2])
 		unless(w1[2]?) then w1[2] = 0
 			
@@ -82,9 +89,9 @@ class HTM
 		w2.push(v[0][0] + v[1][0]) / Math.abs(v[0][0] + v[1][0])
 		unless(w2[0]?) then w2[0] = 0
 		w2.push(v[0][1] + v[1][1]) / Math.abs(v[0][1] + v[1][1])
-		unless(w2[1]?) then w2[1] = 0;  	
+		unless(w2[1]?) then w2[1] = 0  	
 		w2.push(v[0][2] + v[1][2]) / Math.abs(v[0][2] + v[1][2])
-		unless(w2[2]?) then w2[2] = 0; 
+		unless(w2[2]?) then w2[2] = 0 
 		
 		newTriangles = [
 		
@@ -94,23 +101,19 @@ class HTM
 			[w0, w1, w2]   # 3
 		]
 		
-		if @levels is 0
+		if l is 0
 			for triangles in newTriangles # iterate over triangles
-				for verts in triangles # iterate over vertices
-					for components in verts #iterate over components
-						@verts.push components # add components to list
-	
+				for vert in triangles # iterate over vertices
+					for component in vert
+						@verts.push component
 		else
 			for triangles in newTriangles # iterate over triangles
-				subdivide(newTriangles[i], @levels-1);
-	
+				this.subdivide(triangles, l-1);
+		return
 	bind: (gl, shaderProgram) =>
 		gl.bindBuffer(gl.ARRAY_BUFFER, @VertexPositionBuffer)
 		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, @VertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, @VertexColorBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, @VertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
-	
+		return
 	render: (gl) =>
 		gl.drawArrays(gl.TRIANGLES, 0, @VertexPositionBuffer.numItems);
-        
+		return

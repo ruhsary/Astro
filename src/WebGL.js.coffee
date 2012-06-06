@@ -2,18 +2,23 @@ class window.WebGL
 	
 	@gl = 0
 	@shaderProgram = 0
-	@mvMatrix = mat4.create();
-	@mvMatrixStack = [];
-	@pMatrix = mat4.create();
+	@mvMatrix = 0
+	@mvMatrixStack = []
+	@pMatrix = 0
 	
 	constructor: (options) ->
 	
 		@canvas = if options.canvas? then options.canvas else null
 		
-		initGL()
-		initShaders()
-		initBuffers()
+		this.initGL()
+		this.initShaders()
 		
+		@gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		@gl.enable(@gl.DEPTH_TEST);
+		
+		@mvMatrix = mat4.create()
+		@pMatrix = mat4.create()
+				
 	### initialize the webgl context in the canvas ###
 	
 	initGL: () =>
@@ -24,22 +29,23 @@ class window.WebGL
 			@gl.viewportHeight = @canvas.height
 		catch e
 			if not @gl
-				alert "Could not initialise WebGL, sorry :-("
+				alert "Could not initialize WebGL, sorry :-("
 	
 	### initialize shaders programs ###
 
 	getShader:(id)=> 
 	
 		source = null
+		shader = null
 		
 		if(id is "vertex")
-		
 			$.ajax
 				async: false,
 				url: './shader.vs',
-				success: data :() ->
+				success: (data)=>
 					source = $(data).html()
 					shader = @gl.createShader(@gl.VERTEX_SHADER)
+					return
 				,
 			    dataType: 'html'
 			
@@ -47,12 +53,14 @@ class window.WebGL
 			$.ajax
 				async: false,
 				url: './shader.fs',
-				success: data:() ->
+				success: (data)=>
 					source = $(data).html()
 					shader = @gl.createShader(@gl.FRAGMENT_SHADER)
+					return
 				,
 				dataType: 'html'
-			
+
+	
 		@gl.shaderSource(shader, source)
 		@gl.compileShader(shader)
 
@@ -60,14 +68,14 @@ class window.WebGL
 			alert @gl.getShaderInfoLog(shader)
 			return null
 
-		return shaders
+		return shader
 
 	initShaders: ()=>
 		
-		fragmentShader = getShader(@gl, "shader-fs")
-		vertexShader = getShader(@gl, "shader-vs")
+		fragmentShader = this.getShader("fragment")
+		vertexShader = this.getShader("vertex")
 
-		shaderProgram = @gl.createProgram()
+		@shaderProgram = @gl.createProgram()
 		@gl.attachShader(@shaderProgram, vertexShader)
 		@gl.attachShader(@shaderProgram, fragmentShader)
 		@gl.linkProgram(@shaderProgram)
@@ -75,40 +83,42 @@ class window.WebGL
 		if not @gl.getProgramParameter(@shaderProgram, @gl.LINK_STATUS) 
 			alert "Could not initialise shaders"
 
-		@gl.useProgram(shaderProgram)
+		@gl.useProgram(@shaderProgram)
 
 		@shaderProgram.vertexPositionAttribute = @gl.getAttribLocation(@shaderProgram, "aVertexPosition")
 		@gl.enableVertexAttribArray(@shaderProgram.vertexPositionAttribute)
 
-		@shaderProgram.vertexColorAttribute = @gl.getAttribLocation(@shaderProgram, "aVertexColor")
-		@gl.enableVertexAttribArray(@shaderProgram.vertexColorAttribute)
-
-		@shaderProgram.pMatrixUniform = gl.getUniformLocation(@shaderProgram, "uPMatrix")
-		@shaderProgram.mvMatrixUniform = gl.getUniformLocation(@shaderProgram, "uMVMatrix")
+		@shaderProgram.pMatrixUniform = @gl.getUniformLocation(@shaderProgram, "uPMatrix")
+		@shaderProgram.mvMatrixUniform = @gl.getUniformLocation(@shaderProgram, "uMVMatrix")
+		return
 		
 	mvPushMatrix: ()=> 
 		copy = mat4.create()
 		mat4.set(@mvMatrix, copy)
 		@mvMatrixStack.push(copy)
+		return
 
 	mvPopMatrix: ()=> 
-		if mvMatrixStack.length is 0 
+		if @mvMatrixStack.length is 0 
 			throw "Invalid popMatrix!"
-        
-		mvMatrix = mvMatrixStack.pop()
+		@mvMatrix = @mvMatrixStack.pop()
+		return
     
 	setMatrixUniforms: () => 
 		@gl.uniformMatrix4fv(@shaderProgram.pMatrixUniform, false, @pMatrix)
 		@gl.uniformMatrix4fv(@shaderProgram.mvMatrixUniform, false, @mvMatrix)
+		return
     
 	preRender: () =>
 		
 		@gl.viewport(0, 0, @gl.viewportWidth, @gl.viewportHeight)
-		@gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		@gl.clear(@gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT)
 
 		mat4.perspective(45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 100.0, @pMatrix)
-
 		mat4.identity(@mvMatrix)
-		
-	render: () =>
-		setMatrixUniforms()
+		return
+			
+	postRender: () =>
+		mat4.translate(@mvMatrix, [0.0, 0.0, -50.0]);
+		this.setMatrixUniforms()
+		return

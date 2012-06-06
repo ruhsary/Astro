@@ -6,11 +6,12 @@ class SkyView extends WebGL
 	
 	constructor: (options) ->
 		super(options)
-		@HTM = new HTM()
-	
+		@HTM = new HTM(3, @gl)
+		this.render()
+		
 	render: ()=>
-		preRender() # set up matrices
-		@HTM.bind() # bind vertices
-		postRender(@gl, @shaderProgram) # push matrices to Shader
+		this.preRender() # set up matrices
+		@HTM.bind(@gl, @shaderProgram) # bind vertices
+		this.postRender() # push matrices to Shader
 		@HTM.render(@gl) # render to screen
 		
