@@ -61,36 +61,42 @@ class HTM
 		@VertexPositionBuffer.itemSize = 3
 		@VertexPositionBuffer.numItems = 8 * Math.pow(4,@levels) * 3
 		return
+	
+	magnitude: (v1, v2) =>
+		mag = Math.sqrt(v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])
 	subdivide: (v,l) =>
-		
+				
 		# new vertex 1
+		mag = magnitude(v[1], v[2])
 		
 		w0 = []
-		w0.push(v[1][0] + v[2][0]) / Math.abs(v[1][0] + v[2][0])
+		w0.push((v[1][0] + v[2][0]) / mag)
 		unless(w0[0]?) then w0[0] = 0
-		w0.push(v[1][1] + v[2][1]) / Math.abs(v[1][1] + v[2][1])
+		w0.push((v[1][1] + v[2][1]) / mag)
 		unless(w0[1]?) then w0[1] = 0 
-		w0.push(v[1][2] + v[2][2]) / Math.abs(v[1][2] + v[2][2])
+		w0.push((v[1][2] + v[2][2]) / mag)
 		unless(w0[2]?) then w0[2] = 0 
 		
 		# new vertex 2
+		mag = magnitude(v[0], v[2])
 		
 		w1 = [] 
-		w1.push(v[0][0] + v[2][0]) / Math.abs(v[0][0] + v[2][0])
+		w1.push((v[0][0] + v[2][0]) / mag)
 		unless(w1[0]?) then w1[0] = 0
-		w1.push(v[0][1] + v[2][1]) / Math.abs(v[0][1] + v[2][1])
+		w1.push((v[0][1] + v[2][1]) / mag)
 		unless(w1[1]?) then w1[1] = 0  	
-		w1.push(v[0][2] + v[2][2]) / Math.abs(v[0][2] + v[2][2])
+		w1.push((v[0][2] + v[2][2]) / mag)
 		unless(w1[2]?) then w1[2] = 0
 			
 		# new vertex 3
+		mag = magnitude(v[0], v[1])
 		
 		w2 = []
-		w2.push(v[0][0] + v[1][0]) / Math.abs(v[0][0] + v[1][0])
+		w2.push((v[0][0] + v[1][0]) / mag)
 		unless(w2[0]?) then w2[0] = 0
-		w2.push(v[0][1] + v[1][1]) / Math.abs(v[0][1] + v[1][1])
+		w2.push((v[0][1] + v[1][1]) / mag)
 		unless(w2[1]?) then w2[1] = 0  	
-		w2.push(v[0][2] + v[1][2]) / Math.abs(v[0][2] + v[1][2])
+		w2.push((v[0][2] + v[1][2]) / mag)
 		unless(w2[2]?) then w2[2] = 0 
 		
 		newTriangles = [
