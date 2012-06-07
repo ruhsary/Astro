@@ -3,8 +3,8 @@ class HTM
 	@verts = null
 	@VertexPositionBuffer = null
 	@VertexColorBuffer = null
-	
-	constructor: (@levels, @gl) ->
+		
+	constructor: (@levels, @gl, @Math) ->
 		this.createHTM()
 	
 	debugColor: ()=>
@@ -121,14 +121,10 @@ class HTM
 		
 		return
 	
-	# | v1 + v2 | 
-	magnitude: (v1, v2) =>
-		return Math.pow(Math.pow(v1[0] + v2[0], 2) + Math.pow(v1[1] + v2[1], 2) + Math.pow(v1[2] + v2[2], 2), 0.5)
-	
 	subdivide: (v,l) =>
 				
 		# new vertex 1
-		mag = this.magnitude(v[1], v[2])
+		mag = @Math.magnitude(v[1], v[2])
 		
 		w0 = []
 		w0.push((v[1][0] + v[2][0]) / mag)
@@ -139,7 +135,7 @@ class HTM
 		unless(w0[2]?) then w0[2] = 0 
 		
 		# new vertex 2
-		mag = this.magnitude(v[0], v[2])
+		mag = @Math.magnitude(v[0], v[2])
 		
 		w1 = [] 
 		w1.push((v[0][0] + v[2][0]) / mag)
@@ -150,7 +146,7 @@ class HTM
 		unless(w1[2]?) then w1[2] = 0
 		
 		# new vertex 3
-		mag = this.magnitude(v[0], v[1])
+		mag = @Math.magnitude(v[0], v[1])
 		
 		w2 = []
 		w2.push((v[0][0] + v[1][0]) / mag)

@@ -6,12 +6,16 @@ class SkyView extends WebGL
 	@rotation = null
 	@translation = null
 	@renderMode = 0
+	@Math = null
 	
 	constructor: (options) ->
 	
 		super(options)
-		@HTM = new HTM(3, @gl)
-		@rotation = [20.0, 0.0, 0.0]
+		
+		@Math = new math()
+		
+		@HTM = new HTM(3, @gl, @Math)
+		@rotation = [0.0, 0.0, 0.0]
 		@translation = [0.0, 0.0, 0.0]
 		@renderMode = @gl.TRIANGLES
 		

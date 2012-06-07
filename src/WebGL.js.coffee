@@ -129,7 +129,7 @@ class window.WebGL
 			
 	postRender: (rotation, translation) =>
 				
-		this.mvPushMatrix()
+#		this.mvPushMatrix()
 		
 		mat4.translate(@mvMatrix, translation);
 		mat4.rotate(@mvMatrix, this.degToRad(rotation[0]), [1,0,0])
@@ -138,6 +138,6 @@ class window.WebGL
 		
 		this.setMatrixUniforms()
 		
-		this.mvPopMatrix()
+#		this.mvPopMatrix()
 		
 		return
