@@ -10,7 +10,7 @@ class math
 			return [v1[0]-v2[0],v1[1]-v2[1]]
 		else if v1.length is 3
 			return [v1[0]-v2[0],v1[1]-v2[1],v1[2]-v2[2]]
-		else if v1.length is 3
+		else if v1.length is 4
 			return [v1[0]-v2[0],v1[1]-v2[1],v1[2]-v2[2],v1[3]-v2[3]]	
 	# v1 + v2
 	add: (v1, v2)=>
@@ -19,7 +19,7 @@ class math
 			return [v1[0]+v2[0],v1[1]+v2[1]]
 		else if v1.length is 3
 			return [v1[0]+v2[0],v1[1]+v2[1],v1[2]+v2[2]]
-		else if v1.length is 3
+		else if v1.length is 4
 			return [v1[0]+v2[0],v1[1]+v2[1],v1[2]+v2[2],v1[3]+v2[3]]
 	# v1 dot v2
 	dot: (v1,v2)=>
@@ -28,7 +28,7 @@ class math
 			return v1[0]*v2[0]+v1[1]*v2[1]
 		else if v1.length is 3
 			return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]
-		else if v1.length is 3
+		else if v1.length is 4
 			return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]+v1[3]*v2[3]
 	# v1 x v2
 	cross: (v1, v2)=>
@@ -67,6 +67,13 @@ class math
 		T = this.subtract(position, v_0)
 		
 		Q = this.cross(T, E_1)
+		P = this.cross(direction, E_2)
 		
-		return
+		det = 1.0/this.dot(P,E_1)
+		
+		t = det * this.dot(Q, E_2)
+		u = det * this.dot(P,T)
+		v = det * this.dot(Q,direction)
+		
+		return [t,u,v]
 		
