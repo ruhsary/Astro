@@ -96,6 +96,9 @@ class window.WebGL
 		@shaderProgram.pMatrixUniform = @gl.getUniformLocation(@shaderProgram, "uPMatrix")
 		@shaderProgram.mvMatrixUniform = @gl.getUniformLocation(@shaderProgram, "uMVMatrix")
 		return
+	
+	getMatrices: ()=>
+		[@mvMatrix, @pMatrix, [0,0,@gl.viewportWidth, @gl.viewportWidth] ]
 		
 	mvPushMatrix: ()=> 
 		copy = mat4.create()

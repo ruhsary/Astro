@@ -3,9 +3,13 @@ class HTM
 	@verts = null
 	@VertexPositionBuffer = null
 	@VertexColorBuffer = null
+	@initTriangles = null
 		
 	constructor: (@levels, @gl, @Math) ->
 		this.createHTM()
+	
+	getTriangles:()=>
+		return @initTriangles
 	
 	debugColor: ()=>
 		
@@ -14,8 +18,9 @@ class HTM
 		colors = [
 			[[1.0, 0.0, 0.0, 1.0],
 			[1.0, 0.0, 0.0, 1.0],
-			[1.0, 0.0, 0.0, 1.0]],
-			
+			[1.0, 0.0, 0.0, 1.0]]
+		]
+		###
 			[[0.0, 1.0, 0.0, 1.0],
 			[0.0, 1.0, 0.0, 1.0],
 			[0.0, 1.0, 0.0, 1.0]],
@@ -42,23 +47,23 @@ class HTM
 			
 			[[0.0, 0.0, 0.0, 1.0],
 			[0.0, 0.0, 0.0, 1.0],
-			[0.0, 0.0, 0.0, 1.0]]
-		]
+			[0.0, 0.0, 0.0, 1.0]] 
+		] ###
 
-		depth = Math.pow(4, @levels)
+		depth = 0#Math.pow(4, @levels)
 
 		for num in [depth..0]
 			for j in colors
 				for k in j
 					for l in k
 						color.push(l)
-
+		console.log color
 		@VertexColorBuffer = @gl.createBuffer()
 		@gl.bindBuffer(@gl.ARRAY_BUFFER, @VertexColorBuffer)
 
 		@gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(color), @gl.STATIC_DRAW)
 		@VertexColorBuffer.itemSize = 4
-		@VertexColorBuffer.numItems = 8 * Math.pow(4,@levels) * 3
+		@VertexColorBuffer.numItems = 3#8 * Math.pow(4,@levels) * 3
 			
 		return
 	
@@ -66,12 +71,14 @@ class HTM
 		
 		@verts = []
 		
-		initTriangles = [
+		@initTriangles = [
 			# T0
 			[[1.0, 0.0, 0.0],
 			[0.0, 0.0, -1.0],
-			[0.0, 1.0, 0.0]],
-			# T1
+			[0.0, 1.0, 0.0]]
+		]
+		###
+				# T1
 			[[0.0, 1.0, 0.0],
 			[0.0, 0.0, -1.0],
 			[-1.0, 0.0, 0.0]],
@@ -98,24 +105,24 @@ class HTM
 			# T8
 			[[0.0, 1.0, 0.0],
 			[0.0, 0.0, 1.0],
-			[1.0, 0.0, 0.0 ]]
-		]
+			[1.0, 0.0, 0.0 ]] 
+		] ###
 		
 		if @levels is 0
-			for triangles in initTriangles # iterate over triangles
+			for triangles in @initTriangles # iterate over triangles
 				for vert in triangles # iterate over vertices
 					for component in vert
 						@verts.push component
 		else
-			for triangles in initTriangles
+			for triangles in @initTriangles
 				this.subdivide(triangles, @levels-1)
-				
+
 		@VertexPositionBuffer = @gl.createBuffer()
 		@gl.bindBuffer(@gl.ARRAY_BUFFER, @VertexPositionBuffer)
 
 		@gl.bufferData(@gl.ARRAY_BUFFER, new Float32Array(@verts), @gl.STATIC_DRAW)
 		@VertexPositionBuffer.itemSize = 3
-		@VertexPositionBuffer.numItems = 8 * Math.pow(4,@levels) * 3
+		@VertexPositionBuffer.numItems = 3#8 * Math.pow(4,@levels) * 3
 		
 		this.debugColor()
 		
