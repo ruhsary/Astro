@@ -3,6 +3,10 @@ class math
 	# | v1 + v2 | 
 	magnitude: (v1, v2) =>
 		Math.pow(Math.pow(v1[0] + v2[0], 2) + Math.pow(v1[1] + v2[1], 2) + Math.pow(v1[2] + v2[2], 2), 0.5)
+	# | norm v1 |
+	norm: (v1) =>
+		mag = Math.sqrt(Math.pow(v1[0],2) + Math.pow(v1[1],2) + Math.pow(v1[2],2))
+		[v1[0]/mag,v1[1]/mag,v1[2]/mag]
 	# v1 - v2
 	subtract: (v1, v2)=>
 		if v1.length is not v2.length then return null
@@ -32,7 +36,7 @@ class math
 			return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]+v1[3]*v2[3]
 	# v1 x v2
 	cross: (v1, v2)=>
-		[v1[0]*v2[2]-v1[2]*v2[0], v1[2]*v2[0]-v1[0]*v2[2], v1[0]*v2[1]-v1[1]*v2[0]]
+		[v1[1]*v2[2]-v1[2]*v2[1], v1[2]*v2[0]-v1[0]*v2[2], v1[0]*v2[1]-v1[1]*v2[0]]
 	unProj: (winX, winY, winZ, mod_mat, proj_mat, viewport) =>
 		inf = []		
 		# invert the model view and projection matrices
@@ -55,25 +59,41 @@ class math
 				
 		return [out[0]*out[3], out[1]*out[3], out[2]*out[3]]
 	
-	intersectTri: (position, direction, triangle) =>
+	intersectTri: (position, direction, triangle, near, far) =>
 	
+		console.log "dir: ",direction
+		console.log "near: ", near
+		console.log "far: ", far
+
+		console.log "normnear: ", this.norm(near)
+		console.log "normfar: ", this.norm(far)
+
 		v_0 = triangle[0]
 		v_1 = triangle[1]
 		v_2 = triangle[2]
+		console.log "vertices: ",v_0,v_1,v_2
 		
 		E_1 = this.subtract(v_1, v_0)
 		E_2 = this.subtract(v_2, v_0)
-		
+		console.log "e1,e2: ",E_1,E_2
+
 		T = this.subtract(position, v_0)
-		
+		console.log "T: ",T
+
 		Q = this.cross(T, E_1)
 		P = this.cross(direction, E_2)
+		console.log "q,p: ",Q,P
 		
 		det = 1.0/this.dot(P,E_1)
-		
+		console.log "det: ",det
+
 		t = det * this.dot(Q, E_2)
 		u = det * this.dot(P,T)
 		v = det * this.dot(Q,direction)
-		
-		return [t,u,v]
+		console.log "t,u,v: ", t, u, v
+
+		if u >= 0.0 && v >= 0.0 && (u+v) <= 1.0 
+			return [t,u,v]
+		else 
+			return "Not intersected!"
 		
