@@ -13,14 +13,19 @@ class SkyView extends WebGL
 		super(options)
 		
 		@Math = new math()
+		@level = 0
 		
-		@HTM = new HTM(0, @gl, @Math)
+		@HTM = new HTM(@level, @gl, @Math)
 		@rotation = [0.0, 0.0, 0.0]
 		@translation = [0.0, 0.0, -5.0]
 		@renderMode = @gl.TRIANGLES
 		
 		this.render()
-		
+	
+	getScale: =>
+		(180.0 * (1.0-@translation[2]))/2
+	getLevel: =>
+		180.0/(Math.pow(2,@level+1))
 	render: ()=>
 
 		this.preRender() # set up matrices
@@ -32,6 +37,8 @@ class SkyView extends WebGL
 	
 	keyPressed: (key) =>
 
+		console.log this.getScale(), this.getLevel()
+
 		switch String.fromCharCode(key.which)
 			
 			when 'i' then @rotation[0]++
@@ -39,9 +46,17 @@ class SkyView extends WebGL
 			when 'l' then @rotation[1]++
 			when 'j' then @rotation[1]--
 			
-			when 'w' then @translation[2] += 0.1
-			when 's' then @translation[2] -= 0.1
-			
+			when 'w' 
+				@translation[2] += 0.1
+				if this.getScale() < this.getLevel()
+					@level++
+					@HTM = new HTM(@level,@gl,@Math)
+			when 's'
+				@translation[2] -= 0.1
+				if this.getScale() > this.getLevel()
+					@level--
+					@HTM = new HTM(@level,@gl,@Math)
+					
 			when '0' then @HTM = new HTM(0,@gl,@Math)
 			when '1' then @HTM = new HTM(1,@gl,@Math)
 			when '2' then @HTM = new HTM(2,@gl,@Math)
@@ -57,8 +72,10 @@ class SkyView extends WebGL
 	
 	mousePress: (key) =>
 		matrices = this.getMatrices()
-		dir = @Math.unProj(key.x, key.y, 1, matrices[0], matrices[1], matrices[2])
+		near = @Math.unProj(key.x, key.y, 0, matrices[0], matrices[1], matrices[2])
+		far = @Math.unProj(key.x, key.y, 1, matrices[0], matrices[1], matrices[2])
+		dir = @Math.subtract(near,far)
 		tri = @HTM.getTriangles()
 		for triangle in tri
-			@Math.intersectTri([0,0,-1], dir,triangle)
+			console.log @Math.intersectTri([0,0,0], dir,triangle)
 		return

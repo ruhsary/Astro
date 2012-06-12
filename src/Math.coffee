@@ -32,7 +32,7 @@ class math
 			return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]+v1[3]*v2[3]
 	# v1 x v2
 	cross: (v1, v2)=>
-		[v1[0]*v2[2]-v1[2]*v2[0], v1[2]*v2[0]-v1[0]*v2[2], v1[0]*v2[1]-v1[1]*v2[0]]
+		[v1[1]*v2[2]-v1[2]*v2[1], v1[2]*v2[0]-v1[0]*v2[2], v1[0]*v2[1]-v1[1]*v2[0]]
 	unProj: (winX, winY, winZ, mod_mat, proj_mat, viewport) =>
 		inf = []		
 		# invert the model view and projection matrices
@@ -43,12 +43,13 @@ class math
 				
 		inf.push ( (winX - viewport[0])/viewport[2] * 2.0 - 1.0 )
 		inf.push ( (winY - viewport[1])/viewport[3] * 2.0 - 1.0 )
-		inf.push (2 * winZ - 1.0)
+		inf.push (2.0 * winZ - 1.0)
 		inf.push 1.0
 		
 		out = [0,0,0,0]
-		mat4.multiplyVec4(m, inf, out)
 				
+		mat4.multiplyVec4(m, inf, out)
+							
 		if out[3] is 0 then return null
 		
 		out[3] = 1.0/out[3]
@@ -57,10 +58,10 @@ class math
 	
 	intersectTri: (position, direction, triangle) =>
 	
-		v_0 = triangle[0]
+		v_0 = triangle[2]
 		v_1 = triangle[1]
-		v_2 = triangle[2]
-		
+		v_2 = triangle[0]
+				
 		E_1 = this.subtract(v_1, v_0)
 		E_2 = this.subtract(v_2, v_0)
 		

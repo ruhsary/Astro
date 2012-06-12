@@ -98,7 +98,7 @@ class window.WebGL
 		return
 	
 	getMatrices: ()=>
-		[@mvMatrix, @pMatrix, [0,0,@gl.viewportWidth, @gl.viewportWidth] ]
+		[@mvMatrix, @pMatrix, [0,0,@gl.viewportWidth, @gl.viewportHeight] ]
 		
 	mvPushMatrix: ()=> 
 		copy = mat4.create()

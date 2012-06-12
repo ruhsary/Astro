@@ -57,7 +57,7 @@ class HTM
 				for k in j
 					for l in k
 						color.push(l)
-		console.log color
+
 		@VertexColorBuffer = @gl.createBuffer()
 		@gl.bindBuffer(@gl.ARRAY_BUFFER, @VertexColorBuffer)
 
@@ -78,7 +78,7 @@ class HTM
 			[0.0, 1.0, 0.0]]
 		]
 		###
-				# T1
+			# T1
 			[[0.0, 1.0, 0.0],
 			[0.0, 0.0, -1.0],
 			[-1.0, 0.0, 0.0]],
