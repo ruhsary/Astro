@@ -62,25 +62,14 @@ class math
 	
 	intersectTri: (position, direction, triangle, near, far) =>
 	
-<<<<<<< HEAD
+		console.log "dir: ",direction
+
+		###
 		v_0 = triangle[2]
 		v_1 = triangle[1]
 		v_2 = triangle[0]
-				
-=======
-		console.log "dir: ",direction
-		console.log "near: ", near
-		console.log "far: ", far
-
-		console.log "normnear: ", this.norm(near)
-		console.log "normfar: ", this.norm(far)
-
-		v_0 = triangle[0]
-		v_1 = triangle[1]
-		v_2 = triangle[2]
 		console.log "vertices: ",v_0,v_1,v_2
 		
->>>>>>> 1d9be06278186de802377c6191ebcc7dc37ba038
 		E_1 = this.subtract(v_1, v_0)
 		E_2 = this.subtract(v_2, v_0)
 		console.log "e1,e2: ",E_1,E_2
@@ -99,9 +88,27 @@ class math
 		u = det * this.dot(P,T)
 		v = det * this.dot(Q,direction)
 		console.log "t,u,v: ", t, u, v
+		###
+		
+		v_0 = this.subtract(triangle[0], triangle[1])
+		v_1 = this.subtract(triangle[2], triangle[1])
+		v_2 = this.subtract(direction, triangle[1])
 
-		if u >= 0.0 && v >= 0.0 && (u+v) <= 1.0 
-			return [t,u,v]
+		dot00 = this.dot(v_0,v_0)
+		dot01 = this.dot(v_0,v_1)
+		dot02 = this.dot(v_0,v_2)
+		dot11 = this.dot(v_1,v_1)
+		dot12 = this.dot(v_1,v_2)
+		
+		invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01)
+		
+		u = (dot11 * dot02 - dot01 * dot12) * invDenom
+		v = (dot00 * dot12 - dot01 * dot02) * invDenom
+		
+		console.log u, v
+		
+		if u >= 0.0 && v >= 0.0 && (u+v) < 1.0 
+			return "Hit!"
 		else 
 			return "Not intersected!"
 		

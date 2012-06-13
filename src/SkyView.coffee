@@ -72,19 +72,11 @@ class SkyView extends WebGL
 	
 	mousePress: (key) =>
 		matrices = this.getMatrices()
-		near = @Math.unProj(key.x, key.y, 0, matrices[0], matrices[1], matrices[2])
-		far = @Math.unProj(key.x, key.y, 1, matrices[0], matrices[1], matrices[2])
-<<<<<<< HEAD
-		dir = @Math.subtract(near,far)
-		tri = @HTM.getTriangles()
-		for triangle in tri
-			console.log @Math.intersectTri([0,0,0], dir,triangle)
-		return
-=======
-		dir = @Math.subtract(far,near)
-		normdir = @Math.norm(dir)
+		console.log key.x, key.y
+		near = @Math.norm(@Math.unProj(key.x, key.y, 0, matrices[0], matrices[1], matrices[2]))
+		far = @Math.norm(@Math.unProj(key.x, key.y, 1, matrices[0], matrices[1], matrices[2]))
+		dir = @Math.norm(@Math.subtract(near,far))
 		tri = @HTM.getTriangles()		
 		for triangle in tri
-			console.log @Math.intersectTri([0,0,0], normdir,triangle, near, far)
+			console.log @Math.intersectTri([0,0,0], dir,triangle, near, far)
 		return
->>>>>>> 1d9be06278186de802377c6191ebcc7dc37ba038
