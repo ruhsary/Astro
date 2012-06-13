@@ -63,7 +63,7 @@ class math
 	intersectTri: (position, direction, triangle, near, far) =>
 	
 		console.log "dir: ",direction
-
+		console.log "tri: ", triangle
 		###
 		v_0 = triangle[2]
 		v_1 = triangle[1]
@@ -90,8 +90,8 @@ class math
 		console.log "t,u,v: ", t, u, v
 		###
 		
-		v_0 = this.subtract(triangle[0], triangle[1])
-		v_1 = this.subtract(triangle[2], triangle[1])
+		v_0 = this.subtract(triangle[2], triangle[1])
+		v_1 = this.subtract(triangle[0], triangle[1])
 		v_2 = this.subtract(direction, triangle[1])
 
 		dot00 = this.dot(v_0,v_0)
